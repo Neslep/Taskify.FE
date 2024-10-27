@@ -30,7 +30,7 @@ export function NavUpgrade({ sx, ...other }: StackProps) {
       <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
         {`From only `}
         <Box component="strong" sx={{ color: 'text.primary' }}>
-          $69
+          $.../month
         </Box>
       </Typography>
 
@@ -42,7 +42,7 @@ export function NavUpgrade({ sx, ...other }: StackProps) {
       />
 
       <Button
-        href="https://material-ui.com/store/items/minimal-dashboard/"
+        href=""
         target="_blank"
         variant="contained"
         color="inherit"
