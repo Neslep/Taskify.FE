@@ -1,20 +1,16 @@
 import Grid from '@mui/material/Unstable_Grid2';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import AssignmentIcon from '@mui/icons-material/Assignment';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import TaskIcon from '@mui/icons-material/Task';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import PeopleIcon from '@mui/icons-material/People';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import Typography from '@mui/material/Typography';
+import PeopleIcon from '@mui/icons-material/People';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 
-import { _posts, _tasks, _timeline } from 'src/_mock';
+import { _tasks, _timeline } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { AnalyticsTasks } from '../analytics-tasks';
-import { AnalyticsWidgetSummary } from '../analytics-widget-summary';
 import RecentProjects from "../RecentProjects/RecentProjects";
+import { AnalyticsWidgetSummary } from '../analytics-widget-summary';
 // import AddProjects from '../AddProjects/AddProjects';
 import { AnalyticsOrderTimeline } from '../analytics-order-timeline';
 // import { AnalyticsCurrentVisits } from '../analytics-current-visits';

@@ -25,13 +25,13 @@ export type UserProps = {
   isVerified: boolean;
 };
 
-type UserTableRowProps = {
+type ProjectTableRowProps = {
   row: UserProps;
   selected: boolean;
   onSelectRow: () => void;
 };
 
-export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) {
+export function ProjectTableRow({ row, selected, onSelectRow }: ProjectTableRowProps) {
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
 
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {

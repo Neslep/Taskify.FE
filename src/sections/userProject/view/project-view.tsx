@@ -16,17 +16,15 @@ import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 
 import { TableNoData } from '../table-no-data';
-import { UserTableRow } from '../project-table-row';
 import { TableEmptyRows } from '../table-empty-rows';
-import { UserTableHead } from '../project-table-head';
-import { UserTableToolbar } from '../project-table-toolbar';
+import { ProjectTableHead } from '../project-table-head';
+import { ProjectTableToolbar } from '../project-table-toolbar';
 import { emptyRows, applyFilter, getComparator } from '../utils';
-
-import type { UserProps } from '../project-table-row';
+import { type UserProps, ProjectTableRow } from '../project-table-row';
 
 // ----------------------------------------------------------------------
 
-export function UserView() {
+export function ProjectView() {
   const table = useTable();
 
   const [filterName, setFilterName] = useState('');
@@ -55,7 +53,7 @@ export function UserView() {
       </Box>
 
       <Card>
-        <UserTableToolbar
+        <ProjectTableToolbar
           numSelected={table.selected.length}
           filterName={filterName}
           onFilterName={(event: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,7 +65,7 @@ export function UserView() {
         <Scrollbar>
           <TableContainer sx={{ overflow: 'unset' }}>
             <Table sx={{ minWidth: 800 }}>
-              <UserTableHead
+              <ProjectTableHead
                 order={table.order}
                 orderBy={table.orderBy}
                 rowCount={_users.length}
@@ -95,7 +93,7 @@ export function UserView() {
                     table.page * table.rowsPerPage + table.rowsPerPage
                   )
                   .map((row) => (
-                    <UserTableRow
+                    <ProjectTableRow
                       key={row.id}
                       row={row}
                       selected={table.selected.includes(row.id)}

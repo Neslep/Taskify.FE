@@ -2,7 +2,8 @@ import { Helmet } from 'react-helmet-async';
 
 import { CONFIG } from 'src/config-global';
 
-import { UserView } from 'src/sections/userProject/view';
+import { ProjectView } from 'src/sections/userProject/view';
+
 
 // ----------------------------------------------------------------------
 
@@ -13,7 +14,7 @@ export default function Page() {
         <title> {`Projects - ${CONFIG.appName}`}</title>
       </Helmet>
 
-      <UserView />
+      <ProjectView />
     </>
   );
 }
