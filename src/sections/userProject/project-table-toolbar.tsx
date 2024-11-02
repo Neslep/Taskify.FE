@@ -1,13 +1,21 @@
-import Tooltip from '@mui/material/Tooltip';
-import Toolbar from '@mui/material/Toolbar';
+import React, { useState } from 'react';
+
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
 import OutlinedInput from '@mui/material/OutlinedInput';
-import InputAdornment from '@mui/material/InputAdornment';
+import {
+  Dialog,
+  Button,
+  Toolbar,
+  Tooltip,
+  IconButton,
+  DialogTitle,
+  DialogActions,
+  DialogContent,
+  InputAdornment,
+  DialogContentText,
+} from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
-
-// ----------------------------------------------------------------------
 
 type ProjectTableToolbarProps = {
   numSelected: number;
@@ -15,7 +23,26 @@ type ProjectTableToolbarProps = {
   onFilterName: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
-export function ProjectTableToolbar({ numSelected, filterName, onFilterName }: ProjectTableToolbarProps) {
+export function ProjectTableToolbar({
+  numSelected,
+  filterName,
+  onFilterName,
+}: ProjectTableToolbarProps) {
+  const [open, setOpen] = useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleDelete = () => {
+    // Thêm logic xóa ở đây
+    setOpen(false);
+  };
+
   return (
     <Toolbar
       sx={{
@@ -38,7 +65,7 @@ export function ProjectTableToolbar({ numSelected, filterName, onFilterName }: P
           fullWidth
           value={filterName}
           onChange={onFilterName}
-          placeholder="Search user..."
+          placeholder="Search project..."
           startAdornment={
             <InputAdornment position="start">
               <Iconify width={20} icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
@@ -49,11 +76,34 @@ export function ProjectTableToolbar({ numSelected, filterName, onFilterName }: P
       )}
 
       {numSelected > 0 ? (
-        <Tooltip title="Delete">
-          <IconButton>
-            <Iconify icon="solar:trash-bin-trash-bold" />
-          </IconButton>
-        </Tooltip>
+        <>
+          <Tooltip title="Delete">
+            <IconButton onClick={handleClickOpen}>
+              <Iconify icon="solar:trash-bin-trash-bold" />
+            </IconButton>
+          </Tooltip>
+          <Dialog
+            open={open}
+            onClose={handleClose}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <DialogTitle id="alert-dialog-title">Confirm deletion</DialogTitle>
+            <DialogContent>
+              <DialogContentText id="alert-dialog-description">
+                Are you sure you want to delete the selected items?
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+            <Button onClick={handleDelete} variant='contained' color="error" autoFocus>
+                Delete
+              </Button>
+              <Button onClick={handleClose} variant='outlined' color="primary">
+                Cancel
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </>
       ) : (
         <Tooltip title="Filter list">
           <IconButton>

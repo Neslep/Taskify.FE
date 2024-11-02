@@ -9,7 +9,7 @@ import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 
-import { _users } from 'src/_mock';
+import { _projects } from 'src/_mock/_mockProjects';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Iconify } from 'src/components/iconify';
@@ -17,10 +17,10 @@ import { Scrollbar } from 'src/components/scrollbar';
 
 import { TableNoData } from '../table-no-data';
 import { TableEmptyRows } from '../table-empty-rows';
+import { ProjectTableRow } from '../project-table-row';
 import { ProjectTableHead } from '../project-table-head';
 import { ProjectTableToolbar } from '../project-table-toolbar';
 import { emptyRows, applyFilter, getComparator } from '../utils';
-import { type UserProps, ProjectTableRow } from '../project-table-row';
 
 // ----------------------------------------------------------------------
 
@@ -29,8 +29,8 @@ export function ProjectView() {
 
   const [filterName, setFilterName] = useState('');
 
-  const dataFiltered: UserProps[] = applyFilter({
-    inputData: _users,
+  const dataFiltered = applyFilter({
+    inputData: _projects,
     comparator: getComparator(table.order, table.orderBy),
     filterName,
   });
@@ -56,7 +56,7 @@ export function ProjectView() {
         <ProjectTableToolbar
           numSelected={table.selected.length}
           filterName={filterName}
-          onFilterName={(event: React.ChangeEvent<HTMLInputElement>) => {
+          onFilterName={(event) => {
             setFilterName(event.target.value);
             table.onResetPage();
           }}
@@ -68,20 +68,18 @@ export function ProjectView() {
               <ProjectTableHead
                 order={table.order}
                 orderBy={table.orderBy}
-                rowCount={_users.length}
+                rowCount={_projects.length}
                 numSelected={table.selected.length}
                 onSort={table.onSort}
                 onSelectAllRows={(checked) =>
                   table.onSelectAllRows(
                     checked,
-                    _users.map((user) => user.id)
+                    _projects.map((project) => project.id)
                   )
                 }
                 headLabel={[
                   { id: 'name', label: 'Name' },
-                  { id: 'company', label: 'Company' },
-                  { id: 'role', label: 'Role' },
-                  { id: 'isVerified', label: 'Verified', align: 'center' },
+                  { id: 'description', label: 'Description' },
                   { id: 'status', label: 'Status' },
                   { id: '' },
                 ]}
@@ -103,7 +101,7 @@ export function ProjectView() {
 
                 <TableEmptyRows
                   height={68}
-                  emptyRows={emptyRows(table.page, table.rowsPerPage, _users.length)}
+                  emptyRows={emptyRows(table.page, table.rowsPerPage, _projects.length)}
                 />
 
                 {notFound && <TableNoData searchQuery={filterName} />}
@@ -115,7 +113,7 @@ export function ProjectView() {
         <TablePagination
           component="div"
           page={table.page}
-          count={_users.length}
+          count={_projects.length}
           rowsPerPage={table.rowsPerPage}
           onPageChange={table.onChangePage}
           rowsPerPageOptions={[5, 10, 25]}

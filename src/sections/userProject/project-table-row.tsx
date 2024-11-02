@@ -1,7 +1,5 @@
 import { useState, useCallback } from 'react';
 
-import Box from '@mui/material/Box';
-import Avatar from '@mui/material/Avatar';
 import Popover from '@mui/material/Popover';
 import TableRow from '@mui/material/TableRow';
 import Checkbox from '@mui/material/Checkbox';
@@ -15,18 +13,15 @@ import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
-export type UserProps = {
+export type ProjectProps = {
   id: string;
   name: string;
-  role: string;
+  description: string;
   status: string;
-  company: string;
-  avatarUrl: string;
-  isVerified: boolean;
 };
 
 type ProjectTableRowProps = {
-  row: UserProps;
+  row: ProjectProps;
   selected: boolean;
   onSelectRow: () => void;
 };
@@ -50,26 +45,13 @@ export function ProjectTableRow({ row, selected, onSelectRow }: ProjectTableRowP
         </TableCell>
 
         <TableCell component="th" scope="row">
-          <Box gap={2} display="flex" alignItems="center">
-            <Avatar alt={row.name} src={row.avatarUrl} />
-            {row.name}
-          </Box>
+          {row.name}
         </TableCell>
 
-        <TableCell>{row.company}</TableCell>
-
-        <TableCell>{row.role}</TableCell>
-
-        <TableCell align="center">
-          {row.isVerified ? (
-            <Iconify width={22} icon="solar:check-circle-bold" sx={{ color: 'success.main' }} />
-          ) : (
-            '-'
-          )}
-        </TableCell>
+        <TableCell>{row.description}</TableCell>
 
         <TableCell>
-          <Label color={(row.status === 'banned' && 'error') || 'success'}>{row.status}</Label>
+          <Label color={(row.status === 'Completed' && 'success') || 'warning'}>{row.status}</Label>
         </TableCell>
 
         <TableCell align="right">

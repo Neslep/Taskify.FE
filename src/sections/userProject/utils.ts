@@ -1,4 +1,4 @@
-import type { UserProps } from './project-table-row';
+import type { ProjectProps } from './project-table-row';
 
 // ----------------------------------------------------------------------
 
@@ -53,7 +53,7 @@ export function getComparator<Key extends keyof any>(
 // ----------------------------------------------------------------------
 
 type ApplyFilterProps = {
-  inputData: UserProps[];
+  inputData: ProjectProps[];
   filterName: string;
   comparator: (a: any, b: any) => number;
 };
