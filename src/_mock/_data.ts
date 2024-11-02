@@ -121,11 +121,12 @@ export const _langs = [
 export const _timeline = [...Array(5)].map((_, index) => ({
   id: _id(index),
   title: [
-    '1983, orders, $4220',
-    '12 Invoices have been paid',
-    'Order #37745 from September',
-    'New order placed #XF-2356',
-    'New order placed #XF-2346',
+    'Done Create Table on Twitter App',
+    'Design UI Facebok Application 85%',
+    'Done Task on City Advertising Campaign',
+    'Inprogress Create New Theme for Website',
+    'Pick task from Kanban and start',
+    'Start Tasks Web Application Development',
   ][index],
   type: `order${index + 1}`,
   time: _times(index),
