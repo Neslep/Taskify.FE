@@ -1,5 +1,6 @@
 import { Label } from 'src/components/label';
 import { SvgColor } from 'src/components/svg-color';
+import CalendarMonthTwoToneIcon from '@mui/icons-material/CalendarMonthTwoTone';
 
 // ----------------------------------------------------------------------
 
@@ -17,6 +18,11 @@ export const navData = [
     title: 'Projects',
     path: '/projects',
     icon: icon('ic-user'),
+  },
+  {
+    title: 'Calendar',
+    path: '/Calendar',
+    icon: <CalendarMonthTwoToneIcon />,
   },
   {
     title: 'Product',
