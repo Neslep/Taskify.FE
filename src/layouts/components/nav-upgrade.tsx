@@ -30,7 +30,7 @@ export function NavUpgrade({ sx, ...other }: StackProps) {
       <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
         {`From only `}
         <Box component="strong" sx={{ color: 'text.primary' }}>
-          $.../month
+          $5,49/month
         </Box>
       </Typography>
 

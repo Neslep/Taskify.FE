@@ -1,12 +1,16 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import Box from '@mui/material/Box';
+import Avatar from '@mui/material/Avatar';
 import Popover from '@mui/material/Popover';
 import TableRow from '@mui/material/TableRow';
 import Checkbox from '@mui/material/Checkbox';
 import MenuList from '@mui/material/MenuList';
 import TableCell from '@mui/material/TableCell';
 import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import LinearProgress from '@mui/material/LinearProgress';
 import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
 
 import { Label } from 'src/components/label';
@@ -15,10 +19,17 @@ import { Iconify } from 'src/components/iconify';
 // ----------------------------------------------------------------------
 
 export type ProjectProps = {
+  [x: string]: any;
   id: string;
-  name: string;
-  description: string;
-  status: string;
+  taskName: string;
+  assignee: {
+    name: string;
+    avatar: string;
+  };
+  dueDate: string;
+  priority: 'High' | 'Medium' | 'Low';
+  status: 'In Progress' | 'Completed' | 'Pending';
+  progress: number;
 };
 
 type ProjectTableRowProps = {
@@ -41,21 +52,43 @@ export function ProjectTableRow({ row, selected, onSelectRow }: ProjectTableRowP
 
   return (
     <>
-      <TableRow hover tabIndex={-1} role="checkbox" selected={selected}>
+      <TableRow hover selected={selected}>
         <TableCell padding="checkbox">
-          <Checkbox disableRipple checked={selected} onChange={onSelectRow} />
+          <Checkbox checked={selected} onChange={onSelectRow} />
         </TableCell>
-
-        <TableCell component="th" scope="row">
-          {row.name}
-        </TableCell>
-
-        <TableCell>{row.description}</TableCell>
-
+        <TableCell>{row.taskName}</TableCell>
         <TableCell>
-          <Label color={(row.status === 'Completed' && 'success') || 'warning'}>{row.status}</Label>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Avatar src={row.assignee.avatar} sx={{ mr: 2 }} />
+            <Typography variant="body2">{row.assignee.name}</Typography>
+          </Box>
         </TableCell>
-
+        <TableCell>{row.dueDate}</TableCell>
+        <TableCell>
+          <Label color={
+            (row.priority === 'High' && 'error') ||
+            (row.priority === 'Medium' && 'warning') || 
+            'success'
+          }>
+            {row.priority}
+          </Label>
+        </TableCell>
+        <TableCell>
+          <Label color={
+            (row.status === 'Completed' && 'success') ||
+            (row.status === 'In Progress' && 'warning') ||
+            'error'
+          }>
+            {row.status}
+          </Label>
+        </TableCell>
+        <TableCell>
+          <LinearProgress 
+            variant="determinate"
+            value={row.progress}
+            sx={{ width: 120 }}
+          />
+        </TableCell>
         <TableCell align="right">
           <IconButton onClick={handleOpenPopover}>
             <Iconify icon="eva:more-vertical-fill" />
@@ -87,14 +120,14 @@ export function ProjectTableRow({ row, selected, onSelectRow }: ProjectTableRowP
           }}
         >
           <MenuItem onClick={() => { handleClosePopover(); navigate('/projects/projectDetail'); }}>
-            <Iconify icon="mdi:eye" />
-            View
+            <Iconify icon="eva:edit-fill" />
+            Edit
           </MenuItem>
 
-          {/* <MenuItem onClick={handleClosePopover} sx={{ color: 'error.main' }}>
+          <MenuItem onClick={handleClosePopover} sx={{ color: 'error.main' }}>
             <Iconify icon="solar:trash-bin-trash-bold" />
             Delete
-          </MenuItem> */}
+          </MenuItem>
         </MenuList>
       </Popover>
     </>
