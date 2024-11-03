@@ -30,7 +30,7 @@ export function SignInView() {
         fullWidth
         name="email"
         label="Email address"
-        defaultValue="hello@gmail.com"
+        defaultValue="demo@exe101.group4"
         InputLabelProps={{ shrink: true }}
         sx={{ mb: 3 }}
       />
@@ -98,12 +98,12 @@ export function SignInView() {
         <IconButton color="inherit">
           <Iconify icon="logos:google-icon" />
         </IconButton>
-        <IconButton color="inherit">
+        {/* <IconButton color="inherit">
           <Iconify icon="eva:github-fill" />
         </IconButton>
         <IconButton color="inherit">
           <Iconify icon="ri:twitter-x-fill" />
-        </IconButton>
+        </IconButton> */}
       </Box>
     </>
   );
