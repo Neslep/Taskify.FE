@@ -8,6 +8,15 @@ import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import TextField from '@mui/material/TextField';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { _mockProjects } from 'src/_mock/_mockProjectDetail';
@@ -27,12 +36,45 @@ import { emptyRows, applyFilter, getComparator } from '../utils';
 export function ProjectDetailView() {
   const table = useTable();
   const [filterName, setFilterName] = useState('');
+  const [tasks, setTasks] = useState(_mockProjects);
   const dataFiltered = applyFilter({
-    inputData: _mockProjects,
+    inputData: tasks,
     comparator: getComparator(table.order, table.orderBy),
     filterName,
   });
   const notFound = !dataFiltered.length && !!filterName;
+
+  const [openDialog, setOpenDialog] = useState(false);
+  const [newTask, setNewTask] = useState({
+    taskName: '',
+    assignee: { name: '', avatar: '' },
+    dueDate: '',
+    priority: 'Low',
+    status: '',
+    progress: '',
+  });
+
+  const handleOpenDialog = () => {
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
+
+  const handleCreateTask = () => {
+    setTasks([...tasks, { ...newTask, id: (1 + tasks.length).toString(), priority: newTask.priority as 'High' | 'Medium' | 'Low' }]);
+    setNewTask({
+      taskName: '',
+      assignee: { name: '', avatar: '' },
+      dueDate: '',
+      priority: '',
+      status: '',
+      progress: '',
+    });
+    handleCloseDialog();
+  };
+
   return (
     <DashboardContent>
       <Box display="flex" flexDirection="column" mb={5}>
@@ -44,6 +86,7 @@ export function ProjectDetailView() {
             variant="contained"
             color="inherit"
             startIcon={<Iconify icon="mingcute:add-line" />}
+            onClick={handleOpenDialog}
           >
             New Task
           </Button>
@@ -77,13 +120,13 @@ export function ProjectDetailView() {
               <ProjectTableHead
                 order={table.order}
                 orderBy={table.orderBy}
-                rowCount={_mockProjects.length}
+                rowCount={tasks.length}
                 numSelected={table.selected.length}
                 onSort={table.onSort}
                 onSelectAllRows={(checked) =>
                   table.onSelectAllRows(
                     checked,
-                    _mockProjects.map((project) => project.id)
+                    tasks.map((project) => project.id)
                   )
                 }
                 headLabel={[
@@ -133,7 +176,7 @@ export function ProjectDetailView() {
 
                 <TableEmptyRows
                   height={68}
-                  emptyRows={emptyRows(table.page, table.rowsPerPage, _mockProjects.length)}
+                  emptyRows={emptyRows(table.page, table.rowsPerPage, tasks.length)}
                 />
 
                 {notFound && <TableNoData searchQuery={filterName} />}
@@ -145,13 +188,73 @@ export function ProjectDetailView() {
         <TablePagination
           component="div"
           page={table.page}
-          count={_mockProjects.length}
+          count={tasks.length}
           rowsPerPage={table.rowsPerPage}
           onPageChange={table.onChangePage}
           rowsPerPageOptions={[5, 10, 25]}
           onRowsPerPageChange={table.onChangeRowsPerPage}
         />
       </Card>
+
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>Create New Task</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Task Name"
+            fullWidth
+            value={newTask.taskName}
+            onChange={(e) => setNewTask({ ...newTask, taskName: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="Assignee"
+            fullWidth
+            value={newTask.assignee.name}
+            onChange={(e) => setNewTask({ ...newTask, assignee: { ...newTask.assignee, name: e.target.value } })}
+          />
+          <TextField
+            margin="dense"
+            label="Due Date (DD/MM/YYYY hh:mm)"
+            fullWidth
+            value={newTask.dueDate}
+            onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
+            inputProps={{ pattern: "\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}" }}
+          />
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Priority</InputLabel>
+            <Select
+              label="Priority"
+              value={newTask.priority}
+              onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
+              variant="outlined"
+            >
+              <MenuItem value="Low">Low</MenuItem>
+              <MenuItem value="Medium">Medium</MenuItem>
+              <MenuItem value="High">High</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Status</InputLabel>
+            <Select
+              label="Status"
+              value={newTask.status}
+              onChange={(e) => setNewTask({ ...newTask, status: e.target.value })}
+              variant="outlined"
+            >
+              <MenuItem value="Not Started">Not Started</MenuItem>
+              <MenuItem value="InProgress">InProgress</MenuItem>
+              <MenuItem value="Completed">Completed</MenuItem>
+              <MenuItem value="Pending">Pending</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="contained" color="success" onClick={handleCreateTask}>Create</Button>
+          <Button variant="outlined" onClick={handleCloseDialog}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
     </DashboardContent>
   );
 } // ----------------------------------------------------------------------

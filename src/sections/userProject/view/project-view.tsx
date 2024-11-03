@@ -8,6 +8,15 @@ import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import TextField from '@mui/material/TextField';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
 
 import { _projects } from 'src/_mock/_mockProjects';
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -21,6 +30,7 @@ import { ProjectTableRow } from '../project-table-row';
 import { ProjectTableHead } from '../project-table-head';
 import { ProjectTableToolbar } from '../project-table-toolbar';
 import { emptyRows, applyFilter, getComparator } from '../utils';
+import { useTable } from '../projectDetail/view/project-detail-view';
 
 // ----------------------------------------------------------------------
 
@@ -28,9 +38,30 @@ export function ProjectView() {
   const table = useTable();
 
   const [filterName, setFilterName] = useState('');
+  const [openDialog, setOpenDialog] = useState(false);
+  const [projects, setProjects] = useState(_projects);
+  const [newProject, setNewProject] = useState({
+    name: '',
+    description: '',
+    status: 'Not Started',
+  });
+
+  const handleOpenDialog = () => {
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
+
+  const handleCreateProject = () => {
+    setProjects([...projects, { ...newProject, id: (projects.length + 1).toString() }]);
+    setNewProject({ name: '', description: '', status: 'Not Started' }); // Clear form
+    handleCloseDialog();
+  };
 
   const dataFiltered = applyFilter({
-    inputData: _projects,
+    inputData: projects,
     comparator: getComparator(table.order, table.orderBy),
     filterName,
   });
@@ -47,6 +78,7 @@ export function ProjectView() {
           variant="contained"
           color="inherit"
           startIcon={<Iconify icon="mingcute:add-line" />}
+          onClick={handleOpenDialog}
         >
           New Project
         </Button>
@@ -68,13 +100,13 @@ export function ProjectView() {
               <ProjectTableHead
                 order={table.order}
                 orderBy={table.orderBy}
-                rowCount={_projects.length}
+                rowCount={projects.length}
                 numSelected={table.selected.length}
                 onSort={table.onSort}
                 onSelectAllRows={(checked) =>
                   table.onSelectAllRows(
                     checked,
-                    _projects.map((project) => project.id)
+                    projects.map((project) => project.id)
                   )
                 }
                 headLabel={[
@@ -101,7 +133,7 @@ export function ProjectView() {
 
                 <TableEmptyRows
                   height={68}
-                  emptyRows={emptyRows(table.page, table.rowsPerPage, _projects.length)}
+                  emptyRows={emptyRows(table.page, table.rowsPerPage, projects.length)}
                 />
 
                 {notFound && <TableNoData searchQuery={filterName} />}
@@ -113,81 +145,50 @@ export function ProjectView() {
         <TablePagination
           component="div"
           page={table.page}
-          count={_projects.length}
+          count={projects.length}
           rowsPerPage={table.rowsPerPage}
           onPageChange={table.onChangePage}
           rowsPerPageOptions={[5, 10, 25]}
           onRowsPerPageChange={table.onChangeRowsPerPage}
         />
       </Card>
+
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>Create New Project</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Project Name"
+            fullWidth
+            value={newProject.name}
+            onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="Description"
+            fullWidth
+            value={newProject.description}
+            onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
+          />
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Status</InputLabel>
+            <Select
+              label="Status"
+              value={newProject.status}
+              onChange={(e) => setNewProject({ ...newProject, status: e.target.value })}
+              variant="outlined"
+            >
+              <MenuItem value="Not Started">Not Started</MenuItem>
+              <MenuItem value="InProgress">InProgress</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="contained" color="success" onClick={handleCreateProject}>Create</Button>
+          <Button variant="outlined"  onClick={handleCloseDialog}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
     </DashboardContent>
   );
-}
-
-// ----------------------------------------------------------------------
-
-export function useTable() {
-  const [page, setPage] = useState(0);
-  const [orderBy, setOrderBy] = useState('name');
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [selected, setSelected] = useState<string[]>([]);
-  const [order, setOrder] = useState<'asc' | 'desc'>('asc');
-
-  const onSort = useCallback(
-    (id: string) => {
-      const isAsc = orderBy === id && order === 'asc';
-      setOrder(isAsc ? 'desc' : 'asc');
-      setOrderBy(id);
-    },
-    [order, orderBy]
-  );
-
-  const onSelectAllRows = useCallback((checked: boolean, newSelecteds: string[]) => {
-    if (checked) {
-      setSelected(newSelecteds);
-      return;
-    }
-    setSelected([]);
-  }, []);
-
-  const onSelectRow = useCallback(
-    (inputValue: string) => {
-      const newSelected = selected.includes(inputValue)
-        ? selected.filter((value) => value !== inputValue)
-        : [...selected, inputValue];
-
-      setSelected(newSelected);
-    },
-    [selected]
-  );
-
-  const onResetPage = useCallback(() => {
-    setPage(0);
-  }, []);
-
-  const onChangePage = useCallback((event: unknown, newPage: number) => {
-    setPage(newPage);
-  }, []);
-
-  const onChangeRowsPerPage = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setRowsPerPage(parseInt(event.target.value, 10));
-      onResetPage();
-    },
-    [onResetPage]
-  );
-
-  return {
-    page,
-    order,
-    onSort,
-    orderBy,
-    selected,
-    rowsPerPage,
-    onSelectRow,
-    onResetPage,
-    onChangePage,
-    onSelectAllRows,
-    onChangeRowsPerPage,
-  };
 }
