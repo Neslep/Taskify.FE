@@ -1,14 +1,16 @@
 import './CalendarView.css'; // Import CSS file
-import React, { useEffect, useRef, useState } from 'react';
-import { faker } from '@faker-js/faker';
+import type { EventInput, DateSelectArg, EventClickArg } from '@fullcalendar/core';
+
 import dayjs from 'dayjs';
-import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, ButtonGroup, Switch, FormControlLabel } from '@mui/material';
+import { faker } from '@faker-js/faker';
+import listPlugin from '@fullcalendar/list';
 import FullCalendar from '@fullcalendar/react';
-import { DateSelectArg, EventClickArg, EventInput } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import listPlugin from '@fullcalendar/list';
+import React, { useRef, useState, useEffect } from 'react';
+
+import { Box, Dialog, Button, Switch, TextField, DialogTitle, ButtonGroup, DialogActions, DialogContent, FormControlLabel } from '@mui/material';
 // import { DatePicker, TimePicker } from 'antd'; // Import Ant Design components
 
 // Color options for event creation
@@ -26,8 +28,8 @@ const DefaultEventInitValue = {
 
 export default function CalendarView() {
   const fullCalendarRef = useRef<FullCalendar>(null);
-  const [view, setView] = useState('dayGridMonth');
-  const [date, setDate] = useState(new Date());
+  const [view] = useState('dayGridMonth');
+  const [date] = useState(new Date());
   const [open, setOpen] = useState(false);
   const [eventInitValue, setEventInitValue] = useState(DefaultEventInitValue);
   const [eventFormType, setEventFormType] = useState<'add' | 'edit'>('add');

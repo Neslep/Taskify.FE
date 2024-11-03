@@ -1,7 +1,6 @@
-
+import './AddProjects.css';
 
 import React from 'react';
-import './AddProjects.css';
 
 export default function AddProjects() {
     return (

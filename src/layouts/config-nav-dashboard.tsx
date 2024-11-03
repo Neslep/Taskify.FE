@@ -1,6 +1,7 @@
+import CalendarMonthTwoToneIcon from '@mui/icons-material/CalendarMonthTwoTone';
+
 import { Label } from 'src/components/label';
 import { SvgColor } from 'src/components/svg-color';
-import CalendarMonthTwoToneIcon from '@mui/icons-material/CalendarMonthTwoTone';
 
 // ----------------------------------------------------------------------
 
