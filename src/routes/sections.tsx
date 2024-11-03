@@ -18,6 +18,7 @@ export const ProductsPage = lazy(() => import('src/pages/products'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
 export const Calendar = lazy(() => import('src/pages/Calendar'));
 export const ProjectDetail = lazy(() => import('src/pages/projects-detail'));
+export const Kaban = lazy(() => import('src/pages/kanban'));
 
 // ----------------------------------------------------------------------
 
@@ -51,6 +52,7 @@ export function Router() {
         { path: 'products', element: <ProductsPage /> },
         { path: 'blog', element: <BlogPage /> },
         { path: 'projects/projectDetail', element: <ProjectDetail /> },
+        { path: 'kanban', element: <Kaban /> },
       ],
     },
     {

@@ -1,3 +1,4 @@
+import ViewKanbanIcon from '@mui/icons-material/ViewKanban';
 import CalendarMonthTwoToneIcon from '@mui/icons-material/CalendarMonthTwoTone';
 
 import { SvgColor } from 'src/components/svg-color';
@@ -23,7 +24,12 @@ export const navData = [
     title: 'Calendar',
     path: '/Calendar',
     icon: <CalendarMonthTwoToneIcon />,
-  }
+  },
+  {
+    title: 'Kanban',
+    path: '/kanban',
+    icon: <ViewKanbanIcon />,
+  },
   // {
   //   title: 'Product',
   //   path: '/products',
