@@ -55,7 +55,7 @@ export function KanbanView() {
           Kanban Board
         </Typography>
 
-        <Button variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
+        <Button variant="contained" color='inherit' startIcon={<Iconify icon="eva:plus-fill" />}>
           Add Task
         </Button>
       </Box>

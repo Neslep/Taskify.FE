@@ -10,7 +10,18 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import React, { useRef, useState, useEffect } from 'react';
 
-import { Box, Dialog, Button, Switch, TextField, DialogTitle, ButtonGroup, DialogActions, DialogContent, FormControlLabel } from '@mui/material';
+import {
+  Box,
+  Dialog,
+  Button,
+  Switch,
+  TextField,
+  DialogTitle,
+  ButtonGroup,
+  DialogActions,
+  DialogContent,
+  FormControlLabel,
+} from '@mui/material';
 // import { DatePicker, TimePicker } from 'antd'; // Import Ant Design components
 
 // Color options for event creation
@@ -149,14 +160,18 @@ export default function CalendarView() {
               multiline
               rows={3}
               value={eventInitValue.description}
-              onChange={(e) => setEventInitValue({ ...eventInitValue, description: e.target.value })}
+              onChange={(e) =>
+                setEventInitValue({ ...eventInitValue, description: e.target.value })
+              }
               className="text-field"
             />
             <FormControlLabel
               control={
                 <Switch
                   checked={eventInitValue.allDay}
-                  onChange={(e) => setEventInitValue({ ...eventInitValue, allDay: e.target.checked })}
+                  onChange={(e) =>
+                    setEventInitValue({ ...eventInitValue, allDay: e.target.checked })
+                  }
                 />
               }
               label="All Day"
@@ -192,12 +207,21 @@ export default function CalendarView() {
           </DialogContent>
           <DialogActions sx={{ padding: '16px' }}>
             {eventFormType === 'edit' && (
-              <Button onClick={handleDelete} className="delete-button">Delete</Button>
+              <Button onClick={handleDelete} className="delete-button">
+                Delete
+              </Button>
             )}
-            <Button onClick={handleCreateOrEdit} className="save-button">
+            <Button
+              variant="contained"
+              color="inherit"
+              onClick={handleCreateOrEdit}
+              className="save-button"
+            >
               {eventFormType === 'add' ? 'Create' : 'Save'}
             </Button>
-            <Button onClick={handleCancel} variant="outlined">Cancel</Button>
+            <Button color="inherit" onClick={handleCancel} variant="outlined">
+              Cancel
+            </Button>
           </DialogActions>
         </Dialog>
       </Box>

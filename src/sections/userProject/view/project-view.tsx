@@ -1,22 +1,22 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
-import TableBody from '@mui/material/TableBody';
-import Typography from '@mui/material/Typography';
-import TableContainer from '@mui/material/TableContainer';
-import TablePagination from '@mui/material/TablePagination';
 import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
+import TableBody from '@mui/material/TableBody';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import InputLabel from '@mui/material/InputLabel';
+import DialogTitle from '@mui/material/DialogTitle';
+import FormControl from '@mui/material/FormControl';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import TableContainer from '@mui/material/TableContainer';
+import TablePagination from '@mui/material/TablePagination';
 
 import { _projects } from 'src/_mock/_mockProjects';
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -185,8 +185,12 @@ export function ProjectView() {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button variant="contained" color="success" onClick={handleCreateProject}>Create</Button>
-          <Button variant="outlined"  onClick={handleCloseDialog}>Cancel</Button>
+          <Button variant="contained" color="inherit" onClick={handleCreateProject}>
+            Create
+          </Button>
+          <Button variant="outlined" color='inherit' onClick={handleCloseDialog}>
+            Cancel
+          </Button>
         </DialogActions>
       </Dialog>
     </DashboardContent>

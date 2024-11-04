@@ -98,7 +98,7 @@ export function ProjectTableToolbar({
             <Button onClick={handleDelete} variant='contained' color="error" autoFocus>
                 Delete
               </Button>
-              <Button onClick={handleClose} variant='outlined' color="primary">
+              <Button onClick={handleClose} variant='outlined' color="inherit">
                 Cancel
               </Button>
             </DialogActions>

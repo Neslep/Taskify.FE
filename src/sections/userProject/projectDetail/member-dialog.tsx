@@ -62,6 +62,7 @@ export default function ProjectMembersDialog({
           />
           <Button
             variant="contained"
+            color="inherit"
             size="small"
             onClick={handleAddMember}
             disabled={!email}
@@ -85,9 +86,9 @@ export default function ProjectMembersDialog({
                     <MenuItem value="member">Member</MenuItem>
                     <MenuItem value="viewer">Viewer</MenuItem>
                   </Select>
-                  <IconButton 
-                    edge="end" 
-                    size="small" 
+                  <IconButton
+                    edge="end"
+                    size="small"
                     onClick={() => onRemoveMember(member.id)}
                     sx={{ ml: 1 }}
                   >
@@ -107,7 +108,9 @@ export default function ProjectMembersDialog({
         </List>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Close</Button>
+        <Button variant="outlined" color="inherit" onClick={onClose}>
+          Close
+        </Button>
       </DialogActions>
     </Dialog>
   );

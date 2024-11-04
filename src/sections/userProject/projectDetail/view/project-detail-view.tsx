@@ -262,10 +262,10 @@ export function ProjectDetailView() {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button variant="contained" color="success" onClick={handleCreateTask}>
+          <Button variant="contained" color="inherit" onClick={handleCreateTask}>
             Create
           </Button>
-          <Button variant="outlined" onClick={handleCloseDialog}>
+          <Button variant="outlined" color='inherit' onClick={handleCloseDialog}>
             Cancel
           </Button>
         </DialogActions>

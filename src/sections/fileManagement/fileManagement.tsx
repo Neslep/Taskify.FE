@@ -1,24 +1,27 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState } from 'react';
-import {
-  Box,
-  Button,
-  Checkbox,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Typography,
-  Paper,
-  TablePagination,
-} from '@mui/material';
+
 import { styled } from '@mui/system';
-import { mockFiles } from './mockFiles';
 import FolderTwoToneIcon from '@mui/icons-material/FolderTwoTone';
 import InsertDriveFileTwoToneIcon from '@mui/icons-material/InsertDriveFileTwoTone';
 import DriveFolderUploadTwoToneIcon from '@mui/icons-material/DriveFolderUploadTwoTone';
+import {
+  Box,
+  Table,
+  Paper,
+  Button,
+  Checkbox,
+  TableRow,
+  TableBody,
+  TableCell,
+  TableHead,
+  TextField,
+  Typography,
+  TableContainer,
+  TablePagination,
+} from '@mui/material';
+
+import { mockFiles } from './mockFiles';
 
 const Input = styled('input')({
   display: 'none',
@@ -114,7 +117,12 @@ function FileManagement() {
         />
         <label htmlFor="upload-file" id="upload-file-label">
           <Input id="upload-file" type="file" multiple onChange={handleFileChange} />
-          <Button variant="contained" component="span" startIcon={<DriveFolderUploadTwoToneIcon />}>
+          <Button
+            variant="contained"
+            color="inherit"
+            component="span"
+            startIcon={<DriveFolderUploadTwoToneIcon />}
+          >
             Upload
           </Button>
         </label>
