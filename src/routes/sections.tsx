@@ -18,7 +18,8 @@ export const ProductsPage = lazy(() => import('src/pages/products'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
 export const Calendar = lazy(() => import('src/pages/Calendar'));
 export const ProjectDetail = lazy(() => import('src/pages/projects-detail'));
-export const Kaban = lazy(() => import('src/pages/kanban'));
+export const Kanban = lazy(() => import('src/pages/kanban'));
+export const FileManagement = lazy(() => import('src/pages/file-management'));
 
 // ----------------------------------------------------------------------
 
@@ -50,9 +51,10 @@ export function Router() {
         { path: 'projects', element: <ProjectPage /> },
         { path: 'calendar', element: <Calendar /> },
         { path: 'products', element: <ProductsPage /> },
+        { path: 'file-management', element: <FileManagement /> },
         { path: 'blog', element: <BlogPage /> },
         { path: 'projects/projectDetail', element: <ProjectDetail /> },
-        { path: 'kanban', element: <Kaban /> },
+        { path: 'kanban', element: <Kanban /> },
       ],
     },
     {

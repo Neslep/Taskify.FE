@@ -1,5 +1,6 @@
 import ViewKanbanIcon from '@mui/icons-material/ViewKanban';
 import CalendarMonthTwoToneIcon from '@mui/icons-material/CalendarMonthTwoTone';
+import FolderZipTwoToneIcon from '@mui/icons-material/FolderZipTwoTone';
 
 import { SvgColor } from 'src/components/svg-color';
 
@@ -29,6 +30,11 @@ export const navData = [
     title: 'Kanban',
     path: '/kanban',
     icon: <ViewKanbanIcon />,
+  },
+  {
+    title: 'File Management',
+    path: '/file-management',
+    icon: <FolderZipTwoToneIcon/>,
   },
   // {
   //   title: 'Product',
