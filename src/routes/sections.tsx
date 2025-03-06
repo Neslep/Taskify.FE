@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useContext } from 'react';
 import { Outlet, Navigate, useRoutes } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
@@ -6,15 +6,14 @@ import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgr
 
 import { varAlpha } from 'src/theme/styles';
 import { AuthLayout } from 'src/layouts/auth';
+import { AuthContext } from 'src/contexts/AuthContext';
 import { DashboardLayout } from 'src/layouts/dashboard';
 
 // ----------------------------------------------------------------------
 
 export const HomePage = lazy(() => import('src/pages/home'));
-export const BlogPage = lazy(() => import('src/pages/blog'));
 export const ProjectPage = lazy(() => import('src/pages/projects'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
-export const ProductsPage = lazy(() => import('src/pages/products'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
 export const Calendar = lazy(() => import('src/pages/Calendar'));
 export const ProjectDetail = lazy(() => import('src/pages/projects-detail'));
@@ -37,41 +36,52 @@ const renderFallback = (
 );
 
 export function Router() {
-  return useRoutes([
-    {
-      element: (
-        <DashboardLayout>
-          <Suspense fallback={renderFallback}>
-            <Outlet />
-          </Suspense>
-        </DashboardLayout>
-      ),
-      children: [
-        { element: <HomePage />, index: true },
-        { path: 'projects', element: <ProjectPage /> },
-        { path: 'calendar', element: <Calendar /> },
-        { path: 'products', element: <ProductsPage /> },
-        { path: 'file-management', element: <FileManagement /> },
-        { path: 'blog', element: <BlogPage /> },
-        { path: 'projects/projectDetail', element: <ProjectDetail /> },
-        { path: 'kanban', element: <Kanban /> },
-      ],
-    },
-    {
-      path: 'sign-in',
-      element: (
-        <AuthLayout>
-          <SignInPage />
-        </AuthLayout>
-      ),
-    },
-    {
-      path: '404',
-      element: <Page404 />,
-    },
-    {
-      path: '*',
-      element: <Navigate to="/404" replace />,
-    },
-  ]);
+  const { isAuthenticated, loading } = useContext(AuthContext);
+
+  const routeConfig = loading
+    ? [
+        { path: '*', element: renderFallback },
+      ]
+    : [
+        {
+          element: isAuthenticated ? (
+            <DashboardLayout>
+              <Suspense fallback={renderFallback}>
+                <Outlet />
+              </Suspense>
+            </DashboardLayout>
+          ) : (
+            <Navigate to="/sign-in" replace />
+          ),
+          children: [
+            { element: <HomePage />, index: true },
+            { path: 'projects', element: <ProjectPage /> },
+            { path: 'calendar', element: <Calendar /> },
+            { path: 'file-management', element: <FileManagement /> },
+            { path: 'projects/projectDetail', element: <ProjectDetail /> },
+            { path: 'kanban', element: <Kanban /> },
+          ],
+        },
+        {
+          path: 'sign-in',
+          element: (
+            <AuthLayout>
+              <Suspense fallback={renderFallback}>
+                <SignInPage />
+              </Suspense>
+            </AuthLayout>
+          ),
+        },
+        {
+          path: '404',
+          element: <Page404 />,
+        },
+        {
+          path: '*',
+          element: <Navigate to="/404" replace />,
+        },
+      ];
+
+  const routes = useRoutes(routeConfig);
+  return routes;
 }
