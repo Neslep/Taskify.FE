@@ -26,7 +26,7 @@ export function OverviewAnalyticsView() {
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
-        Hi, Welcome back EXE FPT Group 4 👋
+        Hi, Welcome back👋
       </Typography>
 
       <Grid container spacing={3}>
@@ -87,7 +87,7 @@ export function OverviewAnalyticsView() {
           <AnalyticsWidgetSummary
             title="Revenue"
             percent={0}
-            total={1500000}
+            total={1000}
             color="error"
             icon={<AttachMoneyIcon />}
             chart={{

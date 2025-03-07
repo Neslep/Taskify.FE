@@ -3,11 +3,16 @@ import React, { useState, useContext, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
+import Dialog from '@mui/material/Dialog';
+import Button from '@mui/material/Button';
 import Snackbar from '@mui/material/Snackbar';
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 import InputAdornment from '@mui/material/InputAdornment';
 
 import { useRouter } from 'src/routes/hooks';
@@ -17,6 +22,8 @@ import { AuthContext } from 'src/contexts/AuthContext';
 import { Iconify } from 'src/components/iconify';
 
 import { API_BASE_URL } from '../../../config';
+
+// ----------------------------------------------------------------------
 
 export function SignInView() {
   const router = useRouter();
@@ -33,6 +40,9 @@ export function SignInView() {
   // State cho snackbar thông báo lỗi khi đăng nhập sai
   const [errorMessage, setErrorMessage] = useState('');
   const [openSnackbar, setOpenSnackbar] = useState(false);
+
+  // State cho dialog Forgot Password
+  const [openDialog, setOpenDialog] = useState(false);
 
   const handleSnackbarClose = (event: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
@@ -74,12 +84,10 @@ export function SignInView() {
           body: JSON.stringify({ email, password }),
         });
 
-        if (!response.ok) {
-          throw new Error('Login Failed! Email or password incorrect!');
-        }
-
         const result = await response.json();
-        if (!result.isSuccess) {
+        if (!response.ok || !result.isSuccess) {
+          setEmailError('Email or password incorrect!');
+          setPasswordError('Email or password incorrect!');
           throw new Error(result.message || 'Login failed');
         }
 
@@ -113,11 +121,11 @@ export function SignInView() {
   return (
     <>
       <Box gap={1.5} display="flex" flexDirection="column" alignItems="center" sx={{ mb: 5 }}>
-        <Typography variant="h5">Sign in</Typography>
+        <Typography variant="h5">Sign in to Taskify</Typography>
         <Typography variant="body2" color="text.secondary">
           Don’t have an account?
-          <Link variant="subtitle2" sx={{ ml: 0.5 }}>
-            Get started
+          <Link href="/sign-up" variant="subtitle2" sx={{ ml: 0.5 }}>
+            Sign up
           </Link>
         </Typography>
       </Box>
@@ -140,7 +148,13 @@ export function SignInView() {
             sx={{ mb: 3 }}
           />
 
-          <Link variant="body2" color="inherit" sx={{ mb: 1.5 }}>
+          {/* Khi nhấp vào đây sẽ mở dialog Forgot Password */}
+          <Link
+            variant="body2"
+            color="inherit"
+            sx={{ mb: 1.5, cursor: 'pointer' }}
+            onClick={() => setOpenDialog(true)}
+          >
             Forgot password?
           </Link>
 
@@ -195,6 +209,22 @@ export function SignInView() {
           {errorMessage}
         </Alert>
       </Snackbar>
+
+      {/* Dialog Forgot Password */}
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>Forgot Password</DialogTitle>
+        <DialogContent dividers>
+          <Typography variant="body1" gutterBottom>
+            Please contact Admin for support for password change!
+          </Typography>
+          <Link href="https://www.facebook.com/taskifyvn" target="_blank" rel="noopener">
+            👉 Contact admin via Facebook
+          </Link>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)}>Đóng</Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
