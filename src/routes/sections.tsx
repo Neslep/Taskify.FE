@@ -19,6 +19,7 @@ export const Calendar = lazy(() => import('src/pages/Calendar'));
 export const ProjectDetail = lazy(() => import('src/pages/projects-detail'));
 export const Kanban = lazy(() => import('src/pages/kanban'));
 export const FileManagement = lazy(() => import('src/pages/file-management'));
+export const CreateUserPage = lazy(() => import('src/pages/create-user'));
 
 // ----------------------------------------------------------------------
 
@@ -39,9 +40,7 @@ export function Router() {
   const { isAuthenticated, loading } = useContext(AuthContext);
 
   const routeConfig = loading
-    ? [
-        { path: '*', element: renderFallback },
-      ]
+    ? [{ path: '*', element: renderFallback }]
     : [
         {
           element: isAuthenticated ? (
@@ -79,6 +78,16 @@ export function Router() {
         {
           path: '*',
           element: <Navigate to="/404" replace />,
+        },
+        {
+          path: 'sign-up',
+          element: (
+            <AuthLayout>
+              <Suspense fallback={renderFallback}>
+                <CreateUserPage />
+              </Suspense>
+            </AuthLayout>
+          ),
         },
       ];
 
