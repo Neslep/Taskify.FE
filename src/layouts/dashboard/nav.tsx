@@ -1,10 +1,12 @@
 import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
 
-import { useEffect } from 'react';
+import { useEffect, useContext } from 'react';
 
 import Box from '@mui/material/Box';
+import Tooltip from '@mui/material/Tooltip';
 import ListItem from '@mui/material/ListItem';
 import { useTheme } from '@mui/material/styles';
+import LockIcon from '@mui/icons-material/LockOutlined';
 import ListItemButton from '@mui/material/ListItemButton';
 import Drawer, { drawerClasses } from '@mui/material/Drawer';
 
@@ -16,6 +18,8 @@ import { varAlpha } from 'src/theme/styles';
 import { Logo } from 'src/components/logo';
 import { Scrollbar } from 'src/components/scrollbar';
 
+import { NavUpgrade } from '../components/nav-upgrade';
+import { AuthContext } from '../../contexts/AuthContext';
 import { WorkspacesPopover } from '../components/workspaces-popover';
 
 import type { WorkspacesPopoverProps } from '../components/workspaces-popover';
@@ -28,6 +32,7 @@ export type NavContentProps = {
     title: string;
     icon: React.ReactNode;
     info?: React.ReactNode;
+    proOnly?: boolean;
   }[];
   slots?: {
     topArea?: React.ReactNode;
@@ -60,7 +65,10 @@ export function NavDesktop({
         bgcolor: 'var(--layout-nav-bg)',
         zIndex: 'var(--layout-nav-zIndex)',
         width: 'var(--layout-nav-vertical-width)',
-        borderRight: `1px solid var(--layout-nav-border-color, ${varAlpha(theme.vars.palette.grey['500Channel'], 0.12)})`,
+        borderRight: `1px solid var(--layout-nav-border-color, ${varAlpha(
+          theme.vars.palette.grey['500Channel'],
+          0.12
+        )})`,
         [theme.breakpoints.up(layoutQuery)]: {
           display: 'flex',
         },
@@ -71,8 +79,6 @@ export function NavDesktop({
     </Box>
   );
 }
-
-// ----------------------------------------------------------------------
 
 export function NavMobile({
   sx,
@@ -111,10 +117,20 @@ export function NavMobile({
   );
 }
 
-// ----------------------------------------------------------------------
-
 export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
   const pathname = usePathname();
+  const { user } = useContext(AuthContext);
+
+  const currentPlanLabel = user ? (user.plans === 0 ? 'Free' : 'Premium') : null;
+  const safeWorkspaces = workspaces ?? [];
+
+  const workspacesWithDisabled =
+    currentPlanLabel !== null
+      ? safeWorkspaces.map((ws) => ({
+          ...ws,
+          disabled: ws.plan !== currentPlanLabel,
+        }))
+      : safeWorkspaces;
 
   return (
     <>
@@ -122,13 +138,15 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
 
       {slots?.topArea}
 
-      <WorkspacesPopover data={workspaces} sx={{ my: 2 }} />
+      <WorkspacesPopover data={workspacesWithDisabled} sx={{ my: 2 }} />
 
       <Scrollbar fillContent>
         <Box component="nav" display="flex" flex="1 1 auto" flexDirection="column" sx={sx}>
           <Box component="ul" gap={0.5} display="flex" flexDirection="column">
             {data.map((item) => {
               const isActived = item.path === pathname;
+              const isProOnly = item.proOnly;
+              const showLockIcon = isProOnly && user && user.plans === 0;
 
               return (
                 <ListItem disableGutters disablePadding key={item.title}>
@@ -160,10 +178,14 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
                       {item.icon}
                     </Box>
 
-                    <Box component="span" flexGrow={1}>
+                    <Box component="span" flexGrow={1} display="flex" alignItems="center" gap={1}>
                       {item.title}
+                      {showLockIcon && (
+                        <Tooltip title="Chỉ dành cho tài khoản Premium" arrow>
+                          <LockIcon sx={{ fontSize: 20, color: 'grey.500' }} />
+                        </Tooltip>
+                      )}
                     </Box>
-
                     {item.info && item.info}
                   </ListItemButton>
                 </ListItem>
@@ -175,7 +197,7 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
 
       {slots?.bottomArea}
 
-      {/* <NavUpgrade /> */}
+      {user && user.plans === 0 && <NavUpgrade />}
     </>
   );
 }

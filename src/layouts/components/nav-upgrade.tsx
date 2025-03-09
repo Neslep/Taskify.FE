@@ -47,7 +47,7 @@ export function NavUpgrade({ sx, ...other }: StackProps) {
         variant="contained"
         color="inherit"
       >
-        Upgrade to Pro
+        Upgrade to Premium
       </Button>
     </Box>
   );

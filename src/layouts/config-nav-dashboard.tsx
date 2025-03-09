@@ -25,16 +25,19 @@ export const navData = [
     title: 'Calendar',
     path: '/Calendar',
     icon: <CalendarMonthTwoToneIcon />,
+    proOnly: true,
   },
   {
     title: 'Kanban',
     path: '/kanban',
     icon: <ViewKanbanIcon />,
+    proOnly: true,
   },
   {
     title: 'File Management',
     path: '/file-management',
     icon: <FolderZipTwoToneIcon />,
+    proOnly: true,
   },
   // {
   //   title: 'Product',
