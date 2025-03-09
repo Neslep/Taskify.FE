@@ -1,7 +1,9 @@
 import { lazy, Suspense, useContext } from 'react';
-import { Outlet, Navigate, useRoutes } from 'react-router-dom';
+import { Outlet, Navigate, useRoutes, useLocation, useNavigate } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
+import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
 
 import { varAlpha } from 'src/theme/styles';
@@ -23,6 +25,7 @@ export const CreateUserPage = lazy(() => import('src/pages/create-user'));
 
 // ----------------------------------------------------------------------
 
+// Fallback loading component
 const renderFallback = (
   <Box display="flex" alignItems="center" justifyContent="center" flex="1 1 auto">
     <LinearProgress
@@ -35,6 +38,40 @@ const renderFallback = (
     />
   </Box>
 );
+
+// Component bảo vệ các tính năng Pro
+function RequirePro({ children }: { children: JSX.Element }) {
+  const { user, loading } = useContext(AuthContext);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Trong trường hợp đang load thông tin user, hiển thị fallback (hoặc có thể xử lý khác)
+  if (loading) return renderFallback;
+
+  // Nếu user tồn tại và có gói Free (plans === 0)
+  if (user && user.plans === 0) {
+    return (
+      <Box sx={{ p: 2 }}>
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          This feature is available only for Premium users. Please upgrade your plan to access this
+          feature!
+        </Alert>
+        <Button
+          variant="contained"
+          color='inherit'
+          onClick={() => navigate('#', { state: { from: location } })}
+        >
+          Upgrade to Premium Now 🚀
+        </Button>
+      </Box>
+    );
+    // Nếu bạn có route /upgrade, bạn có thể thay thế bằng:
+    // return <Navigate to="/upgrade" state={{ from: location }} replace />;
+  }
+
+  // Nếu user có gói Pro, cho phép truy cập
+  return children;
+}
 
 export function Router() {
   const { isAuthenticated, loading } = useContext(AuthContext);
@@ -55,10 +92,31 @@ export function Router() {
           children: [
             { element: <HomePage />, index: true },
             { path: 'projects', element: <ProjectPage /> },
-            { path: 'calendar', element: <Calendar /> },
-            { path: 'file-management', element: <FileManagement /> },
+            {
+              path: 'calendar',
+              element: (
+                <RequirePro>
+                  <Calendar />
+                </RequirePro>
+              ),
+            },
+            {
+              path: 'kanban',
+              element: (
+                <RequirePro>
+                  <Kanban />
+                </RequirePro>
+              ),
+            },
+            {
+              path: 'file-management',
+              element: (
+                <RequirePro>
+                  <FileManagement />
+                </RequirePro>
+              ),
+            },
             { path: 'projects/projectDetail', element: <ProjectDetail /> },
-            { path: 'kanban', element: <Kanban /> },
           ],
         },
         {
