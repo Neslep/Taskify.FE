@@ -58,7 +58,7 @@ function RequirePro({ children }: { children: JSX.Element }) {
         </Alert>
         <Button
           variant="contained"
-          color='inherit'
+          color="inherit"
           onClick={() => navigate('#', { state: { from: location } })}
         >
           Upgrade to Premium Now 🚀

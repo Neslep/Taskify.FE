@@ -3,8 +3,10 @@ import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
 import { useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
+import Tooltip from '@mui/material/Tooltip';
 import ListItem from '@mui/material/ListItem';
 import { useTheme } from '@mui/material/styles';
+import LockIcon from '@mui/icons-material/LockOutlined';
 import ListItemButton from '@mui/material/ListItemButton';
 import Drawer, { drawerClasses } from '@mui/material/Drawer';
 
@@ -30,6 +32,7 @@ export type NavContentProps = {
     title: string;
     icon: React.ReactNode;
     info?: React.ReactNode;
+    proOnly?: boolean; // Đánh dấu những mục chỉ dành cho gói Pro/Premium
   }[];
   slots?: {
     topArea?: React.ReactNode;
@@ -184,6 +187,10 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
           <Box component="ul" gap={0.5} display="flex" flexDirection="column">
             {data.map((item) => {
               const isActived = item.path === pathname;
+              const isProOnly = item.proOnly;
+              // true nếu mục chỉ dành cho Pro và user đang ở gói Free
+              const showLockIcon = isProOnly && user && user.plans === 0;
+
               return (
                 <ListItem disableGutters disablePadding key={item.title}>
                   <ListItemButton
@@ -210,11 +217,24 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
                       }),
                     }}
                   >
+                    {/* Icon của item */}
                     <Box component="span" sx={{ width: 24, height: 24 }}>
                       {item.icon}
                     </Box>
-                    <Box component="span" flexGrow={1}>
+
+                    {/* Tên menu + LockIcon nếu cần */}
+                    <Box component="span" flexGrow={1} display="flex" alignItems="center" gap={1}>
                       {item.title}
+                      {showLockIcon && (
+                        <Tooltip title="Chỉ dành cho tài khoản Premium" arrow>
+                          <LockIcon
+                            sx={{
+                              fontSize: 20, // to hơn chút so với mặc định
+                              color: 'grey.500',
+                            }}
+                          />
+                        </Tooltip>
+                      )}
                     </Box>
                     {item.info && item.info}
                   </ListItemButton>
