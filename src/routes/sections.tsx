@@ -45,10 +45,8 @@ function RequirePro({ children }: { children: JSX.Element }) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Trong trường hợp đang load thông tin user, hiển thị fallback (hoặc có thể xử lý khác)
   if (loading) return renderFallback;
 
-  // Nếu user tồn tại và có gói Free (plans === 0)
   if (user && user.plans === 0) {
     return (
       <Box sx={{ p: 2 }}>
@@ -65,11 +63,8 @@ function RequirePro({ children }: { children: JSX.Element }) {
         </Button>
       </Box>
     );
-    // Nếu bạn có route /upgrade, bạn có thể thay thế bằng:
-    // return <Navigate to="/upgrade" state={{ from: location }} replace />;
   }
 
-  // Nếu user có gói Pro, cho phép truy cập
   return children;
 }
 

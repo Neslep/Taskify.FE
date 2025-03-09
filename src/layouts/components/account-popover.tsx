@@ -1,6 +1,6 @@
 import type { IconButtonProps } from '@mui/material/IconButton';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useContext, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -16,7 +16,7 @@ import { useRouter, usePathname } from 'src/routes/hooks';
 
 import { _myAccount } from 'src/_mock';
 
-import { API_BASE_URL } from '../../../config';
+import { AuthContext } from '../../contexts/AuthContext';
 
 // ----------------------------------------------------------------------
 
@@ -31,48 +31,10 @@ export type AccountPopoverProps = IconButtonProps & {
 
 export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps) {
   const router = useRouter();
-
   const pathname = usePathname();
+  const { user } = useContext(AuthContext); // Lấy dữ liệu user từ AuthContext
 
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
-
-  const [user, setUser] = useState<{ userName: string; email: string } | null>(null);
-
-  const fetchUser = useCallback(async () => {
-    try {
-      const token = localStorage.getItem('jwttoken');
-      if (!token) {
-        throw new Error('Không tìm thấy token');
-      }
-
-      const response = await fetch(`${API_BASE_URL}api/users/profile`, {
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Lấy thông tin user không thành công');
-      }
-
-      const result = await response.json();
-      if (result.isSuccess) {
-        setUser({
-          userName: result.data.userName,
-          email: result.data.email,
-        });
-      }
-    } catch (error) {
-      console.error('Lỗi khi lấy thông tin user:', error);
-      setUser(null);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
 
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     setOpenPopover(event.currentTarget);
@@ -92,10 +54,8 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
 
   const handleLogout = useCallback(() => {
     handleClosePopover();
-
     localStorage.removeItem('jwttoken');
     sessionStorage.removeItem('email');
-
     router.push('/sign-in');
   }, [handleClosePopover, router]);
 
@@ -108,7 +68,8 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
           width: 40,
           height: 40,
           background: (theme) =>
-            `conic-gradient(${theme.vars.palette.primary.light}, ${theme.vars.palette.warning.light}, ${theme.vars.palette.primary.light})`,
+            `conic-gradient(${theme.vars.palette.primary.light}, 
+          ${theme.vars.palette.warning.light}, ${theme.vars.palette.primary.light})`,
           ...sx,
         }}
         {...other}
@@ -134,7 +95,6 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
           <Typography variant="subtitle2" noWrap>
             {user?.userName || ''}
           </Typography>
-
           <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
             {user?.email || ''}
           </Typography>

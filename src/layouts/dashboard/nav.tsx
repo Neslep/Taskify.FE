@@ -1,6 +1,6 @@
 import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useContext } from 'react';
 
 import Box from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
@@ -18,8 +18,8 @@ import { varAlpha } from 'src/theme/styles';
 import { Logo } from 'src/components/logo';
 import { Scrollbar } from 'src/components/scrollbar';
 
-import { API_BASE_URL } from '../../../config';
 import { NavUpgrade } from '../components/nav-upgrade';
+import { AuthContext } from '../../contexts/AuthContext';
 import { WorkspacesPopover } from '../components/workspaces-popover';
 
 import type { WorkspacesPopoverProps } from '../components/workspaces-popover';
@@ -32,7 +32,7 @@ export type NavContentProps = {
     title: string;
     icon: React.ReactNode;
     info?: React.ReactNode;
-    proOnly?: boolean; // Đánh dấu những mục chỉ dành cho gói Pro/Premium
+    proOnly?: boolean;
   }[];
   slots?: {
     topArea?: React.ReactNode;
@@ -80,8 +80,6 @@ export function NavDesktop({
   );
 }
 
-// ----------------------------------------------------------------------
-
 export function NavMobile({
   sx,
   data,
@@ -119,52 +117,13 @@ export function NavMobile({
   );
 }
 
-// ----------------------------------------------------------------------
-
 export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
   const pathname = usePathname();
-  const [user, setUser] = useState<{ plans: number } | null>(null);
+  const { user } = useContext(AuthContext);
 
-  const fetchUser = useCallback(async () => {
-    try {
-      const token = localStorage.getItem('jwttoken');
-      if (!token) {
-        throw new Error('Không tìm thấy token');
-      }
-
-      const response = await fetch(`${API_BASE_URL}api/users/profile`, {
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Lấy thông tin user không thành công');
-      }
-
-      const result = await response.json();
-      if (result.isSuccess) {
-        setUser(result.data);
-      }
-    } catch (error) {
-      console.error('Lỗi khi lấy thông tin user:', error);
-      setUser(null);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
-
-  // Xác định label của plan dựa trên thông tin user (0: Free, 1: Pro)
-  const currentPlanLabel = user !== null ? (user.plans === 0 ? 'Free' : 'Premium') : null;
-
-  // Đảm bảo workspaces luôn là một mảng (nếu undefined thì dùng mảng rỗng)
+  const currentPlanLabel = user ? (user.plans === 0 ? 'Free' : 'Premium') : null;
   const safeWorkspaces = workspaces ?? [];
 
-  // Nếu có thông tin user, cập nhật dữ liệu workspaces: nếu ws.plan không khớp với plan của user thì disabled
   const workspacesWithDisabled =
     currentPlanLabel !== null
       ? safeWorkspaces.map((ws) => ({
@@ -179,7 +138,6 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
 
       {slots?.topArea}
 
-      {/* Truyền dữ liệu workspaces đã cập nhật vào WorkspacesPopover */}
       <WorkspacesPopover data={workspacesWithDisabled} sx={{ my: 2 }} />
 
       <Scrollbar fillContent>
@@ -188,7 +146,6 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
             {data.map((item) => {
               const isActived = item.path === pathname;
               const isProOnly = item.proOnly;
-              // true nếu mục chỉ dành cho Pro và user đang ở gói Free
               const showLockIcon = isProOnly && user && user.plans === 0;
 
               return (
@@ -217,22 +174,15 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
                       }),
                     }}
                   >
-                    {/* Icon của item */}
                     <Box component="span" sx={{ width: 24, height: 24 }}>
                       {item.icon}
                     </Box>
 
-                    {/* Tên menu + LockIcon nếu cần */}
                     <Box component="span" flexGrow={1} display="flex" alignItems="center" gap={1}>
                       {item.title}
                       {showLockIcon && (
                         <Tooltip title="Chỉ dành cho tài khoản Premium" arrow>
-                          <LockIcon
-                            sx={{
-                              fontSize: 20, // to hơn chút so với mặc định
-                              color: 'grey.500',
-                            }}
-                          />
+                          <LockIcon sx={{ fontSize: 20, color: 'grey.500' }} />
                         </Tooltip>
                       )}
                     </Box>
@@ -247,8 +197,7 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
 
       {slots?.bottomArea}
 
-      {/* Chỉ hiển thị NavUpgrade nếu user đã load và đang dùng gói Free */}
-      {user !== null && user.plans === 0 && <NavUpgrade />}
+      {user && user.plans === 0 && <NavUpgrade />}
     </>
   );
 }

@@ -17,9 +17,8 @@ export type WorkspacesPopoverProps = BoxProps & {
 };
 
 export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopoverProps) {
-  // Lọc ra các workspace không bị disabled (theo plan của user)
   const availableWorkspaces = data.filter((ws) => !ws.disabled);
-  // Nếu có workspace hợp lệ, lấy workspace đầu tiên; nếu không, fallback về workspace đầu tiên có trong data
+
   const workspace = availableWorkspaces[0] || data[0];
 
   const renderAvatar = (alt: string, src: string) => (

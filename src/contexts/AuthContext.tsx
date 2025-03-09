@@ -5,7 +5,6 @@ import React, { useMemo, useState, useEffect, useCallback, createContext } from 
 
 import { API_BASE_URL } from '../../config';
 
-// Định nghĩa kiểu cho user (bổ sung các trường nếu cần)
 type UserType = {
   id: number;
   userName: string;
