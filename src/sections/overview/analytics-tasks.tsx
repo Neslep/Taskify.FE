@@ -45,7 +45,7 @@ export function AnalyticsTasks({ title, subheader, list, ...other }: Props) {
       <CardHeader title={title} subheader={subheader} sx={{ mb: 1 }} />
 
       <Scrollbar sx={{ minHeight: 304 }}>
-        <Stack divider={<Divider sx={{ borderStyle: 'dashed' }} />} sx={{ minWidth: 560 }}>
+        <Stack divider={<Divider sx={{ borderStyle: 'dashed' }} />}>
           {list.map((item) => (
             <Item
               key={item.id}

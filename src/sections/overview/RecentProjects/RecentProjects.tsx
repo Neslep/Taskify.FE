@@ -25,7 +25,7 @@ export default function RecentProjects() {
   };
 
   return (
-    <Card sx={{ width: 560, mx: 'auto', p: 2 }}>
+    <Card sx={{ mx: 'auto', p: 2 }}>
       <CardHeader title="Recent Projects" />
 
       <Stack divider={<Divider sx={{ borderStyle: 'dashed' }} />} sx={{ mt: 2 }}>
