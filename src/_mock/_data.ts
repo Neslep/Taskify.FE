@@ -104,16 +104,6 @@ export const _langs = [
     label: 'English',
     icon: '/assets/icons/flags/ic-flag-en.svg',
   },
-  {
-    value: 'de',
-    label: 'German',
-    icon: '/assets/icons/flags/ic-flag-de.svg',
-  },
-  {
-    value: 'fr',
-    label: 'French',
-    icon: '/assets/icons/flags/ic-flag-fr.svg',
-  },
 ];
 
 // ----------------------------------------------------------------------
@@ -143,48 +133,51 @@ export const _tasks = [...Array(5)].map((_, index) => ({
 
 export const _notifications = [
   {
-    id: _id(1),
-    title: 'Project Alpha Deadline Approaching',
-    description: 'The deadline for Project Alpha is in 3 days. Please ensure all tasks are completed.',
-    avatarUrl: null,
-    type: 'deadline',
+    id: _id(2),
+    title: 'Welcome to Taskify!',
+    description: 'Welcome to Taskify! Have a great journey with us!.',
+    avatarUrl: '/assets/images/avatar/avatar-2.webp',
+    type: 'welcome',
     postedAt: _times(1),
     isUnRead: true,
   },
   {
-    id: _id(2),
-    title: 'Team Meeting Scheduled',
-    description: 'A team meeting has been scheduled for tomorrow at 10 AM to discuss project progress.',
-    avatarUrl: '/assets/images/avatar/avatar-2.webp',
-    type: 'meeting',
-    postedAt: _times(2),
-    isUnRead: true,
-  },
-  {
     id: _id(3),
-    title: 'Task Update: Design Phase',
-    description: 'The design phase of Project Beta has been completed. Moving on to development.',
+    title: 'Upgrade to PREMIUM Today!',
+    description: 'Unlock all features and boost your productivity with Taskify Premium!',
     avatarUrl: '/assets/images/avatar/avatar-3.webp',
-    type: 'task-update',
+    type: 'promotion',
     postedAt: _times(3),
     isUnRead: true,
   },
   {
     id: _id(4),
-    title: 'New Task Assigned',
-    description: 'You have been assigned a new task: "Implement authentication module".',
+    title: 'Need Help? Contact Our Support!',
+    description:
+      'Having trouble getting started? Our support team is here for you. Reach out anytime!',
     avatarUrl: '/assets/images/avatar/avatar-4.webp',
-    type: 'task-assigned',
-    postedAt: _times(4),
+    type: 'support',
+    postedAt: _times(5),
     isUnRead: true,
   },
   {
     id: _id(5),
-    title: 'Project Gamma Completed',
-    description: 'Congratulations! Project Gamma has been successfully completed.',
+    title: 'Quick Start Guide 📖',
+    description:
+      'Check out our guide to learn how to create tasks, manage projects, and collaborate with your team!',
     avatarUrl: '/assets/images/avatar/avatar-5.webp',
-    type: 'project-completed',
-    postedAt: _times(5),
+    type: 'guide',
+    postedAt: _times(8),
+    isUnRead: true,
+  },
+  {
+    id: _id(6),
+    title: 'Invite Your Team! 👥',
+    description:
+      'Taskify works best with your team. Invite your colleagues and start collaborating today!',
+    avatarUrl: '/assets/images/avatar/avatar-6.webp',
+    type: 'invite',
+    postedAt: _times(10),
     isUnRead: true,
   },
 ];

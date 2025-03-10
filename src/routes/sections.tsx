@@ -22,6 +22,7 @@ export const ProjectDetail = lazy(() => import('src/pages/projects-detail'));
 export const Kanban = lazy(() => import('src/pages/kanban'));
 export const FileManagement = lazy(() => import('src/pages/file-management'));
 export const CreateUserPage = lazy(() => import('src/pages/create-user'));
+export const PaymentPage = lazy(() => import('src/pages/payment'));
 
 // ----------------------------------------------------------------------
 
@@ -57,7 +58,7 @@ function RequirePro({ children }: { children: JSX.Element }) {
         <Button
           variant="contained"
           color="inherit"
-          onClick={() => navigate('#', { state: { from: location } })}
+          onClick={() => navigate('/payment', { state: { from: location } })}
         >
           Upgrade to Premium Now 🚀
         </Button>
@@ -112,6 +113,10 @@ export function Router() {
               ),
             },
             { path: 'projects/projectDetail', element: <ProjectDetail /> },
+            {
+              path: 'payment',
+              element: <PaymentPage />,
+            },
           ],
         },
         {
