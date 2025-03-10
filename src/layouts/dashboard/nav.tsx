@@ -181,7 +181,7 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
                     <Box component="span" flexGrow={1} display="flex" alignItems="center" gap={1}>
                       {item.title}
                       {showLockIcon && (
-                        <Tooltip title="Chỉ dành cho tài khoản Premium" arrow>
+                        <Tooltip title="For Premium accounts only!" arrow>
                           <LockIcon sx={{ fontSize: 20, color: 'grey.500' }} />
                         </Tooltip>
                       )}
