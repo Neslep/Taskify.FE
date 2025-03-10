@@ -1,8 +1,6 @@
-
+import type { ProjectProps } from './project-table-row';
 
 // ----------------------------------------------------------------------
-
-import {ProjectProps} from "../../types/project";
 
 export const visuallyHidden = {
   border: 0,
