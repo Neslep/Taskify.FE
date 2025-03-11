@@ -1,11 +1,8 @@
-import type { ReactNode } from 'react';
-
-import { useLocation } from 'react-router-dom';
 import React, { useMemo, useState, useEffect, useCallback, createContext } from 'react';
 
 import { API_BASE_URL } from '../../config';
 
-type UserType = {
+export type UserType = {
   id: number;
   userName: string;
   email: string;
@@ -17,11 +14,12 @@ type UserType = {
   avatarPath: string;
 };
 
-type AuthContextType = {
+export type AuthContextType = {
   isAuthenticated: boolean;
   loading: boolean;
   user: UserType | null;
-  setIsAuthenticated: (val: boolean) => void;
+  login: (newToken: string) => Promise<void>;
+  logout: () => void;
   validateToken: () => Promise<void>;
   fetchUserProfile: () => Promise<void>;
 };
@@ -30,26 +28,43 @@ export const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   loading: true,
   user: null,
-  setIsAuthenticated: () => {},
+  login: async () => {},
+  logout: () => {},
   validateToken: async () => {},
   fetchUserProfile: async () => {},
 });
 
 type AuthProviderProps = {
-  children: ReactNode;
+  children: React.ReactNode;
 };
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [user, setUser] = useState<UserType | null>(null);
+  const [token, setToken] = useState<string | null>(localStorage.getItem('jwttoken'));
+
+  // login: lưu token vào localStorage và state (sẽ trigger validateToken qua useEffect)
+  const login = useCallback(async (newToken: string) => {
+    localStorage.setItem('jwttoken', newToken);
+    setToken(newToken);
+  }, []);
+
+  // logout: xóa token và reset trạng thái auth
+  const logout = useCallback(() => {
+    localStorage.removeItem('jwttoken');
+    sessionStorage.removeItem('email');
+    setToken(null);
+    setIsAuthenticated(false);
+    setUser(null);
+  }, []);
 
   const fetchUserProfile = useCallback(async () => {
+    if (!token) {
+      setUser(null);
+      return;
+    }
     try {
-      const token = localStorage.getItem('jwttoken');
-      if (!token) {
-        throw new Error('No token found');
-      }
       const response = await fetch(`${API_BASE_URL}api/users/profile`, {
         method: 'GET',
         headers: {
@@ -58,24 +73,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
         },
       });
       if (!response.ok) {
-        throw new Error('Lấy thông tin user không thành công');
+        throw new Error('Failed to fetch user profile');
       }
       const result = await response.json();
       if (result.isSuccess) {
         setUser(result.data);
+      } else {
+        setUser(null);
       }
     } catch (error) {
       console.error('Error fetching user profile:', error);
       setUser(null);
     }
-  }, []);
+  }, [token]);
 
   const validateToken = useCallback(async () => {
+    if (!token) {
+      setIsAuthenticated(false);
+      setLoading(false);
+      return;
+    }
     try {
-      const token = localStorage.getItem('jwttoken');
-      if (!token) {
-        throw new Error('No token found');
-      }
       const response = await fetch(`${API_BASE_URL}api/users/validateToken`, {
         method: 'GET',
         headers: {
@@ -84,38 +102,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
         },
       });
       if (!response.ok) {
-        throw new Error('Token không hợp lệ hoặc hết hạn');
+        throw new Error('Invalid or expired token');
       }
       setIsAuthenticated(true);
-      // Nếu token hợp lệ, gọi API lấy thông tin người dùng
       await fetchUserProfile();
     } catch (error) {
       console.error('Error validating token:', error);
-      localStorage.removeItem('jwttoken');
-      setIsAuthenticated(false);
-      setUser(null);
+      logout();
     } finally {
       setLoading(false);
     }
-  }, [fetchUserProfile]);
+  }, [token, fetchUserProfile, logout]);
 
-  // Lấy location để theo dõi sự thay đổi của route
-  const location = useLocation();
   useEffect(() => {
-    // Mỗi khi location thay đổi, gọi validateToken để cập nhật thông tin user
     validateToken();
-  }, [location, validateToken]);
+  }, [token, validateToken]);
 
   const authContextValue = useMemo(
     () => ({
       isAuthenticated,
       loading,
       user,
-      setIsAuthenticated,
+      login,
+      logout,
       validateToken,
       fetchUserProfile,
     }),
-    [isAuthenticated, loading, user, validateToken, fetchUserProfile]
+    [isAuthenticated, loading, user, login, logout, validateToken, fetchUserProfile]
   );
 
   return <AuthContext.Provider value={authContextValue}>{children}</AuthContext.Provider>;

@@ -1,4 +1,4 @@
-import React, { useState, useContext, useCallback } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -27,27 +27,22 @@ import { API_BASE_URL } from '../../../config';
 
 export function SignInView() {
   const router = useRouter();
-  const { setIsAuthenticated } = useContext(AuthContext);
+  const { login, isAuthenticated } = useContext(AuthContext);
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // State cho validate của từng trường
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
-  // State cho snackbar thông báo lỗi khi đăng nhập sai
   const [errorMessage, setErrorMessage] = useState('');
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
-  // State cho dialog Forgot Password
   const [openDialog, setOpenDialog] = useState(false);
 
   const handleSnackbarClose = (event: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === 'clickaway') {
-      return;
-    }
+    if (reason === 'clickaway') return;
     setOpenSnackbar(false);
   };
 
@@ -69,11 +64,9 @@ export function SignInView() {
       } else {
         setPasswordError('');
       }
-      if (!valid) {
-        return;
-      }
+      if (!valid) return;
 
-      const minDelay = 2000; // 2 giây
+      const minDelay = 2000;
       const startTime = Date.now();
 
       setLoading(true);
@@ -91,14 +84,10 @@ export function SignInView() {
           throw new Error(result.message || 'Login failed');
         }
 
-        // Lưu token vào localStorage
-        localStorage.setItem('jwttoken', result.data);
         sessionStorage.setItem('email', email);
-
-        // Báo cho AuthContext biết là đã login
-        setIsAuthenticated(true);
-
-        router.push('/');
+        // Gọi login để set token vào AuthContext (validateToken sẽ tự động chạy)
+        await login(result.data);
+        // Không gọi router.push() ở đây mà dùng useEffect bên dưới để chuyển hướng khi isAuthenticated true
       } catch (error: any) {
         setErrorMessage(error.message || 'Error occurs!');
         setOpenSnackbar(true);
@@ -107,16 +96,21 @@ export function SignInView() {
         const elapsed = Date.now() - startTime;
         const remainingDelay = minDelay - elapsed;
         if (remainingDelay > 0) {
-          setTimeout(() => {
-            setLoading(false);
-          }, remainingDelay);
+          setTimeout(() => setLoading(false), remainingDelay);
         } else {
           setLoading(false);
         }
       }
     },
-    [email, password, router, setIsAuthenticated]
+    [email, password, login]
   );
+
+  // Chuyển hướng về trang chủ sau khi isAuthenticated chuyển sang true
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/');
+    }
+  }, [isAuthenticated, router]);
 
   return (
     <>
@@ -139,9 +133,7 @@ export function SignInView() {
             value={email}
             onChange={(e) => {
               setEmail(e.target.value);
-              if (e.target.value.trim()) {
-                setEmailError('');
-              }
+              if (e.target.value.trim()) setEmailError('');
             }}
             error={!!emailError}
             helperText={emailError}
@@ -165,9 +157,7 @@ export function SignInView() {
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
-              if (e.target.value.trim()) {
-                setPasswordError('');
-              }
+              if (e.target.value.trim()) setPasswordError('');
             }}
             type={showPassword ? 'text' : 'password'}
             error={!!passwordError}

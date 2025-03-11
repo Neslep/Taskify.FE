@@ -32,7 +32,7 @@ export type AccountPopoverProps = IconButtonProps & {
 export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user } = useContext(AuthContext); // Lấy dữ liệu user từ AuthContext
+  const { user, logout } = useContext(AuthContext);
 
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
 
@@ -54,10 +54,9 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
 
   const handleLogout = useCallback(() => {
     handleClosePopover();
-    localStorage.removeItem('jwttoken');
-    sessionStorage.removeItem('email');
+    logout();
     router.push('/sign-in');
-  }, [handleClosePopover, router]);
+  }, [handleClosePopover, logout, router]);
 
   return (
     <>
@@ -68,8 +67,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
           width: 40,
           height: 40,
           background: (theme) =>
-            `conic-gradient(${theme.vars.palette.primary.light}, 
-          ${theme.vars.palette.warning.light}, ${theme.vars.palette.primary.light})`,
+            `conic-gradient(${theme.vars.palette.primary.light}, ${theme.vars.palette.warning.light}, ${theme.vars.palette.primary.light})`,
           ...sx,
         }}
         {...other}
@@ -86,9 +84,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         slotProps={{
-          paper: {
-            sx: { width: 200 },
-          },
+          paper: { sx: { width: 200 } },
         }}
       >
         <Box sx={{ p: 2, pb: 1.5 }}>
