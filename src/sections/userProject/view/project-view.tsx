@@ -1,51 +1,43 @@
-import React, { useState, useEffect, useContext, useCallback } from 'react';
-
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
-import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import Snackbar from '@mui/material/Snackbar';
 import TableBody from '@mui/material/TableBody';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import InputLabel from '@mui/material/InputLabel';
-import { DialogContentText } from '@mui/material';
 import DialogTitle from '@mui/material/DialogTitle';
 import FormControl from '@mui/material/FormControl';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
-
 import { DashboardContent } from 'src/layouts/dashboard';
-
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
-
 import { TableNoData } from '../table-no-data';
-import { useTable } from '../projectDetail/view';
-import { API_BASE_URL } from '../../../../config';
 import { TableEmptyRows } from '../table-empty-rows';
 import { ProjectTableRow } from '../project-table-row';
 import { ProjectTableHead } from '../project-table-head';
-import { AuthContext } from '../../../contexts/AuthContext';
 import { ProjectTableToolbar } from '../project-table-toolbar';
-import { emptyRows, applyFilter, getComparator } from '../utils';
+import { applyFilter, emptyRows, getComparator } from '../utils';
+import { useTable } from '../projectDetail/view';
+import { API_BASE_URL } from '../../../../config';
+import {ProjectType} from '../../../types/project';
 import {PlanType, ProjectRoles, ProjectStatus} from '../../../types/enum';
-
-import type {ProjectType} from '../../../types/project';
+import { AuthContext } from '../../../contexts/AuthContext';
 
 export function ProjectView() {
   const table = useTable();
   const { user } = useContext(AuthContext);
   const [filterName, setFilterName] = useState('');
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [errorSnackbar, setErrorSnackbar] = useState({ open: false, message: '' });
   const [projects, setProjects] = useState<ProjectType[]>([]);
@@ -73,11 +65,19 @@ export function ProjectView() {
         },
       });
 
+      if (!response.ok) {
+        setErrorSnackbar({ open: true, message: 'Get information failed' });
+        return;
+      }
+
       const result = await response.json();
       if (result.isSuccess) {
         const projectsData = result.data.$values.map((project: any) => ({
           ...project,
           userProjects: project.userProjects.$values,
+          tasks: project.tasks.$values,
+          kanbans: project.kanbans.$values,
+          todolists: project.todolists.$values,
         }));
         setProjects(projectsData);
       }
@@ -85,23 +85,13 @@ export function ProjectView() {
       setErrorSnackbar({ open: true, message: 'Error fetching user information' });
       setProjects([]);
     }
-  }, []); // Chỉ chạy lại khi `user` thay đổi
-
+  }, []);
 
   useEffect(() => {
     fetchProject();
-  }, [fetchProject]); // Theo dõi sự thay đổi của projects
-
-
-
+  }, [fetchProject]);
 
   const handleCreateProject = async () => {
-
-    if (newProject.name.length < 3) {
-      setErrorSnackbar({ open: true, message: 'Project name must be at least 3 characters long' });
-      return;
-    }
-
     try {
       const token = localStorage.getItem('jwttoken');
       if (!token) {
@@ -135,7 +125,7 @@ export function ProjectView() {
 
       const result = await response.json();
       if (result.isSuccess) {
-        await fetchProject(); // Fetch lại dữ liệu khi tạo thành công
+        setProjects([...projects, result.data]);
         setNewProject({
           name: '',
           description: '',
@@ -150,24 +140,8 @@ export function ProjectView() {
     }
   };
 
-
   const handleEditProject = async () => {
     if (!editProject) return;
-
-    const isDuplicateName = projects.some(
-      (project) => project.projectName === editProject.projectName && project.id !== editProject.id
-    );
-
-    if (isDuplicateName) {
-      setErrorSnackbar({ open: true, message: 'Project name already exists' });
-      return;
-    }
-
-    if (editProject.projectName.length < 3) {
-      setErrorSnackbar({ open: true, message: 'Project name must be at least 3 characters long' });
-      return;
-    }
-
 
     try {
       const token = localStorage.getItem('jwttoken');
@@ -192,7 +166,11 @@ export function ProjectView() {
 
       const result = await response.json();
       if (result.isSuccess) {
-        await fetchProject(); // Fetch lại dữ liệu sau khi chỉnh sửa thành công
+        setProjects((prevProjects) =>
+            prevProjects.map((project) =>
+                project.id === editProject.id ? result.data : project
+            )
+        );
         setEditProject(null);
         handleCloseEditDialog();
       }
@@ -201,13 +179,8 @@ export function ProjectView() {
       setErrorSnackbar({ open: true, message: 'Error editing project' });
     }
   };
-  const handleDeleteProject = (projectId: string) => {
-    setProjectToDelete(projectId);
-    setOpenDeleteDialog(true);
-  };
-  const confirmDeleteProject = async () => {
-    if (!projectToDelete) return;
 
+  const handleDeleteProject = async (projectId: string) => {
     try {
       const token = localStorage.getItem('jwttoken');
       if (!token) {
@@ -215,7 +188,7 @@ export function ProjectView() {
         return;
       }
 
-      const response = await fetch(`${API_BASE_URL}api/projects/${projectToDelete}`, {
+      const response = await fetch(`${API_BASE_URL}api/projects/${projectId}`, {
         method: 'DELETE',
         headers: {
           Accept: 'application/json',
@@ -230,15 +203,12 @@ export function ProjectView() {
 
       const result = await response.json();
       if (result.isSuccess) {
-        await fetchProject(); // Fetch updated data after successful deletion
+        setProjects((prevProjects) => prevProjects.filter((project) => project.id !== projectId));
         setErrorSnackbar({ open: true, message: 'Project deleted successfully' });
       }
     } catch (error) {
       console.error('Error deleting project:', error);
       setErrorSnackbar({ open: true, message: 'Error deleting project' });
-    } finally {
-      setOpenDeleteDialog(false);
-      setProjectToDelete(null);
     }
   };
 
@@ -467,31 +437,6 @@ export function ProjectView() {
             </Button>
           </DialogActions>
         </Dialog>
-
-
-        <Dialog
-          open={openDeleteDialog}
-          onClose={() => setOpenDeleteDialog(false)}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-        >
-          <DialogTitle id="alert-dialog-title">Confirm Deletion</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-description">
-              Are you sure you want to delete this project?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={confirmDeleteProject} variant="contained" color="error" autoFocus>
-              Delete
-            </Button>
-            <Button onClick={() => setOpenDeleteDialog(false)} variant="outlined" color="inherit">
-              Cancel
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-
 
         <Snackbar
             open={errorSnackbar.open}
