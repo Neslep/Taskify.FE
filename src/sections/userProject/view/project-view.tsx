@@ -35,15 +35,16 @@ import { ProjectTableHead } from '../project-table-head';
 import { AuthContext } from '../../../contexts/AuthContext';
 import { ProjectTableToolbar } from '../project-table-toolbar';
 import { emptyRows, applyFilter, getComparator } from '../utils';
-import {PlanType, ProjectRoles, ProjectStatus} from '../../../types/enum';
+import { PlanType, ProjectRoles, ProjectStatus } from '../../../types/enum';
 
-import type {ProjectType} from '../../../types/project';
+import type { ProjectType } from '../../../types/project';
 
 export function ProjectView() {
   const table = useTable();
   const { user } = useContext(AuthContext);
   const [filterName, setFilterName] = useState('');
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
   const [openEditDialog, setOpenEditDialog] = useState(false);
@@ -53,7 +54,8 @@ export function ProjectView() {
     name: '',
     description: '',
     status: ProjectStatus.NotStarted,
-    memberName: '',
+    memberEmail: '',
+    memberEmails: [] as string[],
   });
   const [editProject, setEditProject] = useState<ProjectType | null>(null);
 
@@ -87,18 +89,23 @@ export function ProjectView() {
     }
   }, []); // Chỉ chạy lại khi `user` thay đổi
 
-
   useEffect(() => {
     fetchProject();
   }, [fetchProject]); // Theo dõi sự thay đổi của projects
 
-
-
-
   const handleCreateProject = async () => {
+    setLoading(true);
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (newProject.name.length < 3) {
       setErrorSnackbar({ open: true, message: 'Project name must be at least 3 characters long' });
+      setLoading(false);
+      return;
+    }
+
+    if (newProject.memberEmail && !emailRegex.test(newProject.memberEmail)) {
+      setErrorSnackbar({ open: true, message: 'Invalid email format' });
+      setLoading(false);
       return;
     }
 
@@ -106,11 +113,13 @@ export function ProjectView() {
       const token = localStorage.getItem('jwttoken');
       if (!token) {
         setErrorSnackbar({ open: true, message: 'Token not found' });
+        setLoading(false);
         return;
       }
 
       if (user && user.plans === PlanType.Free && projects.length >= 1) {
-        setErrorSnackbar({ open: true, message: 'Free plan users are limited project creation' });
+        setErrorSnackbar({ open: true, message: 'Free plan users are limited to one project' });
+        setLoading(false);
         return;
       }
 
@@ -124,55 +133,66 @@ export function ProjectView() {
           projectName: newProject.name,
           description: newProject.description,
           projectStatus: newProject.status,
-          memberName: newProject.memberName,
+          memberEmails: newProject.memberEmails, // Allow empty emails
         }),
       });
 
       if (!response.ok) {
         setErrorSnackbar({ open: true, message: 'Failed to create project' });
+        setLoading(false);
         return;
       }
 
-      const result = await response.json();
-      if (result.isSuccess) {
-        await fetchProject(); // Fetch lại dữ liệu khi tạo thành công
+      const createResult = await response.json();
+      if (createResult.isSuccess) {
+        await fetchProject();
         setNewProject({
           name: '',
           description: '',
           status: ProjectStatus.NotStarted,
-          memberName: '',
+          memberEmail: '',
+          memberEmails: [],
         });
         handleCloseCreateDialog();
+        setErrorSnackbar({ open: true, message: 'Project created successfully' });
       }
     } catch (error) {
       console.error('Error creating project:', error);
       setErrorSnackbar({ open: true, message: 'Error creating project' });
+    } finally {
+      setLoading(false);
     }
   };
 
-
   const handleEditProject = async () => {
-    if (!editProject) return;
+    setLoading(true);
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    const isDuplicateName = projects.some(
-      (project) => project.projectName === editProject.projectName && project.id !== editProject.id
-    );
-
-    if (isDuplicateName) {
-      setErrorSnackbar({ open: true, message: 'Project name already exists' });
+    if (!editProject) {
+      setLoading(false);
       return;
     }
 
     if (editProject.projectName.length < 3) {
       setErrorSnackbar({ open: true, message: 'Project name must be at least 3 characters long' });
+      setLoading(false);
       return;
     }
 
+    if (
+      editProject.memberEmails &&
+      !editProject.memberEmails.every((email) => emailRegex.test(email))
+    ) {
+      setErrorSnackbar({ open: true, message: 'Invalid email format' });
+      setLoading(false);
+      return;
+    }
 
     try {
       const token = localStorage.getItem('jwttoken');
       if (!token) {
         setErrorSnackbar({ open: true, message: 'Token not found' });
+        setLoading(false);
         return;
       }
 
@@ -187,18 +207,23 @@ export function ProjectView() {
 
       if (!response.ok) {
         setErrorSnackbar({ open: true, message: 'Failed to edit project' });
+        setLoading(false);
         return;
       }
 
-      const result = await response.json();
-      if (result.isSuccess) {
-        await fetchProject(); // Fetch lại dữ liệu sau khi chỉnh sửa thành công
+      const editResult = await response.json();
+      if (editResult.isSuccess) {
+        await fetchProject();
         setEditProject(null);
         handleCloseEditDialog();
+        setErrorSnackbar({ open: true, message: 'Project edited successfully' });
       }
     } catch (error) {
       console.error('Error editing project:', error);
       setErrorSnackbar({ open: true, message: 'Error editing project' });
+    }
+    finally {
+      setLoading(false);
     }
   };
   const handleDeleteProject = (projectId: string) => {
@@ -252,7 +277,7 @@ export function ProjectView() {
 
   const handleOpenEditDialog = (project: ProjectType) => {
     const currentUserProject = project.userProjects.find(
-        (userProject) => userProject.userId === user?.id
+      (userProject) => userProject.userId === user?.id
     );
     if (currentUserProject?.roleInProject === ProjectRoles.Owner) {
       setEditProject(project);
@@ -284,225 +309,244 @@ export function ProjectView() {
   const notFound = !dataFiltered.length && !!filterName;
 
   return (
-      <DashboardContent>
-        <Box display="flex" alignItems="center" mb={5}>
-          <Typography variant="h4" flexGrow={1}>
-            Projects
-          </Typography>
-          <Button
-              variant="contained"
-              color="inherit"
-              startIcon={<Iconify icon="mingcute:add-line" />}
-              onClick={handleOpenCreateDialog}
-          >
-            New Project
-          </Button>
-        </Box>
+    <DashboardContent>
+      <Box display="flex" alignItems="center" mb={5}>
+        <Typography variant="h4" flexGrow={1}>
+          Projects
+        </Typography>
+        <Button
+          variant="contained"
+          color="inherit"
+          startIcon={<Iconify icon="mingcute:add-line" />}
+          onClick={handleOpenCreateDialog}
+        >
+          New Project
+        </Button>
+      </Box>
 
-        <Card>
-          <ProjectTableToolbar
-              numSelected={table.selected.length}
-              filterName={filterName}
-              onFilterName={(event) => {
-                setFilterName(event.target.value);
-                table.onResetPage();
-              }}
-          />
+      <Card>
+        <ProjectTableToolbar
+          numSelected={table.selected.length}
+          filterName={filterName}
+          onFilterName={(event) => {
+            setFilterName(event.target.value);
+            table.onResetPage();
+          }}
+        />
 
-          <Scrollbar>
-            <TableContainer sx={{ overflow: 'unset' }}>
-              <Table sx={{ minWidth: 800 }}>
-                <ProjectTableHead
-                    order={table.order}
-                    orderBy={table.orderBy}
-                    rowCount={projects.length}
-                    numSelected={table.selected.length}
-                    onSort={table.onSort}
-                    onSelectAllRows={(checked) =>
-                        table.onSelectAllRows(
-                            checked,
-                            projects.map((project) => project.id)
-                        )
-                    }
-                    headLabel={[
-                      { id: 'name', label: 'Name' },
-                      { id: 'description', label: 'Description' },
-                      { id: 'status', label: 'Status' },
-                      { id: '' },
-                    ]}
+        <Scrollbar>
+          <TableContainer sx={{ overflow: 'unset' }}>
+            <Table sx={{ minWidth: 800 }}>
+              <ProjectTableHead
+                order={table.order}
+                orderBy={table.orderBy}
+                rowCount={projects.length}
+                numSelected={table.selected.length}
+                onSort={table.onSort}
+                onSelectAllRows={(checked) =>
+                  table.onSelectAllRows(
+                    checked,
+                    projects.map((project) => project.id)
+                  )
+                }
+                headLabel={[
+                  { id: 'name', label: 'Name' },
+                  { id: 'description', label: 'Description' },
+                  { id: 'status', label: 'Status' },
+                  { id: '' },
+                ]}
+              />
+              <TableBody>
+                {dataFiltered
+                  .slice(
+                    table.page * table.rowsPerPage,
+                    table.page * table.rowsPerPage + table.rowsPerPage
+                  )
+                  .map((row) => (
+                    <ProjectTableRow
+                      key={row.id}
+                      row={row}
+                      selected={table.selected.includes(row.id)}
+                      onSelectRow={() => table.onSelectRow(row.id)}
+                      onEditRow={() => handleOpenEditDialog(row as unknown as ProjectType)}
+                      onDeleteRow={() => handleDeleteProject(row.id)} // Add this line
+                    />
+                  ))}
+                <TableEmptyRows
+                  height={68}
+                  emptyRows={emptyRows(table.page, table.rowsPerPage, projects.length)}
                 />
-                <TableBody>
-                  {dataFiltered
-                      .slice(
-                          table.page * table.rowsPerPage,
-                          table.page * table.rowsPerPage + table.rowsPerPage
-                      )
-                      .map((row) => (
-                          <ProjectTableRow
-                              key={row.id}
-                              row={row}
-                              selected={table.selected.includes(row.id)}
-                              onSelectRow={() => table.onSelectRow(row.id)}
-                              onEditRow={() => handleOpenEditDialog(row as unknown as ProjectType)}
-                              onDeleteRow={() => handleDeleteProject(row.id)} // Add this line
-                          />
-                      ))}
-                  <TableEmptyRows
-                      height={68}
-                      emptyRows={emptyRows(table.page, table.rowsPerPage, projects.length)}
-                  />
-                  {notFound && <TableNoData searchQuery={filterName} />}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Scrollbar>
+                {notFound && <TableNoData searchQuery={filterName} />}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Scrollbar>
 
-          <TablePagination
-              component="div"
-              page={table.page}
-              count={projects.length}
-              rowsPerPage={table.rowsPerPage}
-              onPageChange={table.onChangePage}
-              rowsPerPageOptions={[5, 10, 25]}
-              onRowsPerPageChange={table.onChangeRowsPerPage}
+        <TablePagination
+          component="div"
+          page={table.page}
+          count={projects.length}
+          rowsPerPage={table.rowsPerPage}
+          onPageChange={table.onChangePage}
+          rowsPerPageOptions={[5, 10, 25]}
+          onRowsPerPageChange={table.onChangeRowsPerPage}
+        />
+      </Card>
+
+      <Dialog open={openCreateDialog} onClose={handleCloseCreateDialog}>
+        <DialogTitle>Create New Project</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Project Name"
+            fullWidth
+            value={newProject.name}
+            onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
           />
-        </Card>
+          <TextField
+            margin="dense"
+            label="Description"
+            fullWidth
+            value={newProject.description}
+            onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
+          />
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Status</InputLabel>
+            <Select
+              label="Status"
+              value={newProject.status}
+              onChange={(e) =>
+                setNewProject({ ...newProject, status: e.target.value as ProjectStatus })
+              }
+              variant="outlined"
+            >
+              <MenuItem value={ProjectStatus.NotStarted}>Not Started</MenuItem>
+              <MenuItem value={ProjectStatus.InProgress}>In Progress</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            margin="dense"
+            label="Member Emails"
+            fullWidth
+            value={newProject.memberEmails.join(', ') || ''}
+            onChange={(e) =>
+              setNewProject({
+                ...newProject,
+                memberEmails: e.target.value.split(',').map((email) => email.trim()),
+              })
+            }
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button variant="contained" color="inherit" onClick={handleCreateProject} disabled={loading}>
+            {loading ? 'Creating...' : 'Create'}
+          </Button>
+          <Button variant="outlined" color="inherit" onClick={handleCloseCreateDialog}>
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-        <Dialog open={openCreateDialog} onClose={handleCloseCreateDialog}>
-          <DialogTitle>Create New Project</DialogTitle>
-          <DialogContent>
-            <TextField
-                autoFocus
-                margin="dense"
-                label="Project Name"
-                fullWidth
-                value={newProject.name}
-                onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
-            />
-            <TextField
-                margin="dense"
-                label="Description"
-                fullWidth
-                value={newProject.description}
-                onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
-            />
-            <FormControl fullWidth margin="dense">
-              <InputLabel>Status</InputLabel>
-              <Select
-                  label="Status"
-                  value={newProject.status}
-                  onChange={(e) =>
-                      setNewProject({ ...newProject, status: e.target.value as ProjectStatus })
+      <Dialog open={openEditDialog} onClose={handleCloseEditDialog}>
+        <DialogTitle>Edit Project</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Project Name"
+            fullWidth
+            value={editProject?.projectName || ''}
+            onChange={(e) =>
+              setEditProject((prev) => prev && { ...prev, projectName: e.target.value })
+            }
+          />
+          <TextField
+            margin="dense"
+            label="Description"
+            fullWidth
+            value={editProject?.description || ''}
+            onChange={(e) =>
+              setEditProject((prev) => prev && { ...prev, description: e.target.value })
+            }
+          />
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Status</InputLabel>
+            <Select
+              label="Status"
+              value={editProject?.projectStatus || ''}
+              onChange={(e) =>
+                setEditProject(
+                  (prev) =>
+                    prev && { ...prev, projectStatus: e.target.value as unknown as ProjectStatus }
+                )
+              }
+              variant="outlined"
+            >
+              <MenuItem value={ProjectStatus.NotStarted}>Not Started</MenuItem>
+              <MenuItem value={ProjectStatus.InProgress}>In Progress</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            margin="dense"
+            label="Member Emails"
+            fullWidth
+            value={editProject?.memberEmails?.join(', ') || ''}
+            onChange={(e) =>
+              setEditProject(
+                (prev) =>
+                  prev && {
+                    ...prev,
+                    memberEmails: e.target.value.split(',').map((email) => email.trim()),
                   }
-                  variant="outlined"
-              >
-                <MenuItem value={ProjectStatus.NotStarted}>Not Started</MenuItem>
-                <MenuItem value={ProjectStatus.InProgress}>In Progress</MenuItem>
-              </Select>
-            </FormControl>
-            <TextField
-                margin="dense"
-                label="Member Name"
-                fullWidth
-                value={newProject.memberName}
-                onChange={(e) => setNewProject({ ...newProject, memberName: e.target.value })}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button variant="contained" color="inherit" onClick={handleCreateProject}>
-              Create
-            </Button>
-            <Button variant="outlined" color="inherit" onClick={handleCloseCreateDialog}>
-              Cancel
-            </Button>
-          </DialogActions>
-        </Dialog>
+              )
+            }
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button variant="contained" color="inherit" onClick={handleEditProject} disabled={loading}>
+            {loading ? 'Saving...' : 'Save'}
+          </Button>
+          <Button variant="outlined" color="inherit" onClick={handleCloseEditDialog}>
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-        <Dialog open={openEditDialog} onClose={handleCloseEditDialog}>
-          <DialogTitle>Edit Project</DialogTitle>
-          <DialogContent>
-            <TextField
-                autoFocus
-                margin="dense"
-                label="Project Name"
-                fullWidth
-                value={editProject?.projectName || ''}
-                onChange={(e) =>
-                    setEditProject((prev) => prev && { ...prev, projectName: e.target.value })
-                }
-            />
-            <TextField
-                margin="dense"
-                label="Description"
-                fullWidth
-                value={editProject?.description || ''}
-                onChange={(e) =>
-                    setEditProject((prev) => prev && { ...prev, description: e.target.value })
-                }
-            />
-            <FormControl fullWidth margin="dense">
-              <InputLabel>Status</InputLabel>
-              <Select
-                  label="Status"
-                  value={editProject?.projectStatus || ''}
-                  onChange={(e) =>
-                      setEditProject((prev) => prev && { ...prev, projectStatus: e.target.value as unknown as ProjectStatus })
-                  }
-                  variant="outlined"
-              >
-                <MenuItem value={ProjectStatus.NotStarted}>Not Started</MenuItem>
-                <MenuItem value={ProjectStatus.InProgress}>In Progress</MenuItem>
-                <MenuItem value={ProjectStatus.Completed}>Completed</MenuItem>
-                <MenuItem value={ProjectStatus.InReview}>In Review</MenuItem>
-                <MenuItem value={ProjectStatus.Ongoing}>Ongoing</MenuItem>
-              </Select>
-            </FormControl>
-          </DialogContent>
-          <DialogActions>
-            <Button variant="contained" color="inherit" onClick={handleEditProject}>
-              Save
-            </Button>
-            <Button variant="outlined" color="inherit" onClick={handleCloseEditDialog}>
-              Cancel
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-
-        <Dialog
-          open={openDeleteDialog}
-          onClose={() => setOpenDeleteDialog(false)}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-        >
-          <DialogTitle id="alert-dialog-title">Confirm Deletion</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-description">
-              Are you sure you want to delete this project?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={confirmDeleteProject} variant="contained" color="error" autoFocus>
-              Delete
-            </Button>
-            <Button onClick={() => setOpenDeleteDialog(false)} variant="outlined" color="inherit">
-              Cancel
-            </Button>
-          </DialogActions>
-        </Dialog>
+      <Dialog
+        open={openDeleteDialog}
+        onClose={() => setOpenDeleteDialog(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete this project?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={confirmDeleteProject} variant="contained" color="error" autoFocus>
+            Delete
+          </Button>
+          <Button onClick={() => setOpenDeleteDialog(false)} variant="outlined" color="inherit">
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
 
 
 
-        <Snackbar
-            open={errorSnackbar.open}
-            autoHideDuration={6000}
-            onClose={handleCloseSnackbar}
-            anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        >
-          <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
-            {errorSnackbar.message}
-          </Alert>
-        </Snackbar>
-      </DashboardContent>
+      <Snackbar
+        open={errorSnackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+          {errorSnackbar.message}
+        </Alert>
+      </Snackbar>
+    </DashboardContent>
   );
 }

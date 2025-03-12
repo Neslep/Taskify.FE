@@ -6,11 +6,12 @@ export interface ProjectType {
     description: string;
     projectStatus: ProjectStatus | string;
     ownerId?: number;
-    owner?: UserType;
+    owner?: UserType[];
     userProjects: UserProjectType[];
     tasks: TaskType[];
     kanbans: KanbanType[];
     todolists: TodolistType[];
+    memberEmails?: string[];
 }
 
 export interface UserType {
@@ -25,6 +26,7 @@ export interface UserProjectType {
     userId: number;
     projectId: string;
     roleInProject: ProjectRoles | string;
+
     // Add other properties as needed
 }
 
