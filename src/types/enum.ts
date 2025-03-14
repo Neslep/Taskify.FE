@@ -13,3 +13,9 @@ export enum ProjectRoles {
     Owner = 0,
     Member = 1
 }
+
+export enum Gender {
+    Male    = 0,
+    FeMale = 1,
+    Other = 2
+}

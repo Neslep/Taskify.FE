@@ -1,11 +1,12 @@
 import React from 'react';
+
+import Box from '@mui/material/Box';
 import Dialog from '@mui/material/Dialog';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
 
 interface ErrorDialogProps {
     open: boolean;

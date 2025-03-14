@@ -2,7 +2,7 @@
 
 // ----------------------------------------------------------------------
 
-import {ProjectProps} from "../../types/project";
+import type {ProjectProps} from "../../types/project";
 
 export const visuallyHidden = {
   border: 0,
