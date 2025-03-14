@@ -5,20 +5,13 @@ import PeopleIcon from '@mui/icons-material/People';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 
-import { _tasks, _timeline } from 'src/_mock';
+import { _tasks } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { AnalyticsTasks } from '../analytics-tasks';
 import RecentProjects from '../RecentProjects/RecentProjects';
+import {AnalyticsUserMember } from '../analytics-order-timeline';
 import { AnalyticsWidgetSummary } from '../analytics-widget-summary';
-// import AddProjects from '../AddProjects/AddProjects';
-import { AnalyticsOrderTimeline } from '../analytics-order-timeline';
-// import { AnalyticsCurrentVisits } from '../analytics-current-visits';
-// import { AnalyticsNews } from '../analytics-news';
-// import { AnalyticsTrafficBySite } from '../analytics-traffic-by-site';
-// import { AnalyticsWebsiteVisits } from '../analytics-website-visits';
-// import { AnalyticsConversionRates } from '../analytics-conversion-rates';
-// import { AnalyticsCurrentSubject } from '../analytics-current-subject';
 
 // ----------------------------------------------------------------------
 
@@ -96,7 +89,7 @@ export function OverviewAnalyticsView() {
         </Grid>
 
         <Grid xs={12} md={4}>
-          <AnalyticsOrderTimeline title="History timeline" list={_timeline} />
+          <AnalyticsUserMember title="User Member" list={[]} />
         </Grid>
 
         <Grid xs={12} md={4}>

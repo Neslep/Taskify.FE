@@ -1,4 +1,4 @@
-import {PlanType, ProjectRoles, ProjectStatus} from "./enum";
+import type { Gender, PlanType, ProjectRoles, ProjectStatus } from './enum';
 
 export interface ProjectType {
     id: string;
@@ -17,6 +17,8 @@ export interface ProjectType {
 export interface UserType {
     id: number;
     name: string;
+    avatar: string;
+    gender: Gender | string;
     email: string;
     plans: PlanType | string;
 }

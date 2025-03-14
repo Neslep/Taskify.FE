@@ -11,8 +11,10 @@ import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
+
 import { ProjectStatus } from 'src/types/enum';
-import { ProjectTableRowProps } from '../../types/project';
+
+import type { ProjectTableRowProps } from '../../types/project';
 
 function mapStatusToText(status: ProjectStatus): string {
     switch (status) {
