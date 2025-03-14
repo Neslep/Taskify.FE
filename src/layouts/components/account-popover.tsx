@@ -14,7 +14,7 @@ import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
 
 import { useRouter, usePathname } from 'src/routes/hooks';
 
-import { _myAccount } from 'src/_mock';
+import { Gender } from 'src/types/enum';
 
 import { AuthContext } from '../../contexts/AuthContext';
 
@@ -33,6 +33,13 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout } = useContext(AuthContext);
+
+  const avatarSrc =
+    user?.gender === Gender.Male
+      ? 'assets/images/avatar/avatar-25.webp'
+      : user?.gender === Gender.FeMale
+        ? 'assets/images/avatar/avatar-1.webp'
+        : 'assets/images/avatar/avatar-23.webp';
 
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
 
@@ -72,8 +79,8 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
         }}
         {...other}
       >
-        <Avatar src={_myAccount.photoURL} alt={_myAccount.displayName} sx={{ width: 1, height: 1 }}>
-          {_myAccount.displayName.charAt(0).toUpperCase()}
+        <Avatar src={avatarSrc} alt={user?.userName} sx={{ width: 1, height: 1 }}>
+          {user?.userName.charAt(0).toUpperCase()}
         </Avatar>
       </IconButton>
 

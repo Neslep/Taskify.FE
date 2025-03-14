@@ -88,10 +88,17 @@ export function AnalyticsUserMember({ title, subheader, ...other }: Props) {
   }, [fetchMember]);
 
   return (
-    <Card {...other}>
+    <Card
+      {...other}
+      sx={{
+        minHeight: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
       <CardHeader title={title} subheader={subheader} />
 
-      <Box sx={{ height: 275, overflow: 'auto' }}>
+      <Box sx={{ height: 250, overflow: 'auto' }}>
         {loading ? (
           <Typography variant="body1" align="center" sx={{ mt: 2 }}>
             Loading...
@@ -112,18 +119,17 @@ export function AnalyticsUserMember({ title, subheader, ...other }: Props) {
             ))}
           </Timeline>
         ) : (
-          <Typography variant="h4" align="center" sx={{ mt: 2 }}>
-            Don&apos;t have member
+          <Typography fontSize="12px" align="center" sx={{ mt: 2 }}>
+            Empty List
           </Typography>
         )}
       </Box>
 
-      <Pagination
-        count={totalPages}
-        page={page}
-        onChange={handleChange}
-        sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}
-      />
+      {totalPages > 1 && (
+        <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'center', p: 2 }}>
+          <Pagination count={totalPages} page={page} onChange={handleChange} />
+        </Box>
+      )}
     </Card>
   );
 }

@@ -50,7 +50,6 @@ export function SignInView() {
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
 
-      // Validate các trường trước khi gửi request
       let valid = true;
       if (!email.trim()) {
         setEmailError('Please input your Email!');
@@ -65,9 +64,6 @@ export function SignInView() {
         setPasswordError('');
       }
       if (!valid) return;
-
-      const minDelay = 2000;
-      const startTime = Date.now();
 
       setLoading(true);
       try {
@@ -85,30 +81,20 @@ export function SignInView() {
         }
 
         sessionStorage.setItem('email', email);
-        // Gọi login để set token vào AuthContext (validateToken sẽ tự động chạy)
+
         await login(result.data);
-        // Không gọi router.push() ở đây mà dùng useEffect bên dưới để chuyển hướng khi isAuthenticated true
       } catch (error: any) {
         setErrorMessage(error.message || 'Error occurs!');
         setOpenSnackbar(true);
-      } finally {
-        // Tính toán thời gian đã trôi qua và đảm bảo loading kéo dài tối thiểu minDelay
-        const elapsed = Date.now() - startTime;
-        const remainingDelay = minDelay - elapsed;
-        if (remainingDelay > 0) {
-          setTimeout(() => setLoading(false), remainingDelay);
-        } else {
-          setLoading(false);
-        }
       }
     },
     [email, password, login]
   );
 
-  // Chuyển hướng về trang chủ sau khi isAuthenticated chuyển sang true
   useEffect(() => {
     if (isAuthenticated) {
       router.push('/');
+      setLoading(false);
     }
   }, [isAuthenticated, router]);
 

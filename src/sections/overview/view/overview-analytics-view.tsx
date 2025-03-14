@@ -1,21 +1,61 @@
+import { keyframes } from '@mui/system';
 import Grid from '@mui/material/Unstable_Grid2';
 import TaskIcon from '@mui/icons-material/Task';
 import Typography from '@mui/material/Typography';
 import PeopleIcon from '@mui/icons-material/People';
 import AssignmentIcon from '@mui/icons-material/Assignment';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 
-import { _tasks } from 'src/_mock';
+import { useProjects } from 'src/hooks/project-data-hook';
+import { useMemberData } from 'src/hooks/project-member-hook';
+
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { AnalyticsTasks } from '../analytics-tasks';
+import { UserProfileWidget } from '../user-profile-widget';
 import RecentProjects from '../RecentProjects/RecentProjects';
-import {AnalyticsUserMember } from '../analytics-order-timeline';
+import { AnalyticsUserMember } from '../analytics-order-timeline';
 import { AnalyticsWidgetSummary } from '../analytics-widget-summary';
 
 // ----------------------------------------------------------------------
 
+const rippleAnimation = keyframes`
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(4);
+    opacity: 0;
+  }
+`;
+
+const widgetHoverStyle = {
+  position: 'relative', // cần thiết để định vị pseudo-element
+  overflow: 'hidden', // ẩn phần pseudo-element tràn ra ngoài
+  transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
+  '&:hover': {
+    transform: 'scale(1.05) rotateX(3deg) rotateY(3deg)', // tạo hiệu ứng 3D nhẹ
+    boxShadow: '0px 15px 30px rgba(0, 0, 0, 0.1)', // đổ bóng mạnh hơn
+  },
+
+  '&:active::before': {
+    content: '""',
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    width: 100,
+    height: 100,
+    background: 'rgba(255, 255, 255, 0.5)',
+    borderRadius: '50%',
+    transform: 'translate(-50%, -50%) scale(0)',
+    animation: `${rippleAnimation} 0.6s ease-out`,
+  },
+};
+
 export function OverviewAnalyticsView() {
+  const { projects } = useProjects();
+  const { members } = useMemberData();
+
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
@@ -25,24 +65,29 @@ export function OverviewAnalyticsView() {
       <Grid container spacing={3}>
         {/* ====== 4 WIDGET TÓM TẮT ====== */}
         <Grid xs={12} sm={6} md={3}>
+          <UserProfileWidget sx={widgetHoverStyle} />
+        </Grid>
+
+        <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
             title="Projects"
-            percent={0}
-            total={5}
+            percent={projects.length}
+            total={projects.length}
             icon={<AssignmentIcon />}
             chart={{
               series: [],
               categories: [],
               options: undefined,
             }}
+            sx={widgetHoverStyle}
           />
         </Grid>
 
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
             title="Tasks"
-            percent={0}
-            total={3}
+            percent={projects.length}
+            total={projects.length}
             color="secondary"
             icon={<TaskIcon />}
             chart={{
@@ -50,14 +95,15 @@ export function OverviewAnalyticsView() {
               categories: [],
               options: undefined,
             }}
+            sx={widgetHoverStyle}
           />
         </Grid>
 
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
             title="Members"
-            percent={0}
-            total={15}
+            percent={members.length}
+            total={members.length}
             color="warning"
             icon={<PeopleIcon />}
             chart={{
@@ -65,10 +111,11 @@ export function OverviewAnalyticsView() {
               categories: [],
               options: undefined,
             }}
+            sx={widgetHoverStyle}
           />
         </Grid>
 
-        <Grid xs={12} sm={6} md={3}>
+        {/* <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
             title="Revenue"
             percent={0}
@@ -80,12 +127,13 @@ export function OverviewAnalyticsView() {
               categories: [],
               options: undefined,
             }}
+            sx={widgetHoverStyle}
           />
-        </Grid>
+        </Grid> */}
 
         {/* ====== 3 COMPONENT CHÍNH BÊN DƯỚI ====== */}
         <Grid xs={12} md={4}>
-          <RecentProjects />
+          <RecentProjects title="Recent Projects" />
         </Grid>
 
         <Grid xs={12} md={4}>
@@ -93,7 +141,7 @@ export function OverviewAnalyticsView() {
         </Grid>
 
         <Grid xs={12} md={4}>
-          <AnalyticsTasks title="Tasks" list={_tasks} />
+          <AnalyticsTasks title="Tasks" />
         </Grid>
       </Grid>
 
