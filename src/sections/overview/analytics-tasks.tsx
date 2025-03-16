@@ -30,7 +30,6 @@ type Props = CardProps & {
 };
 
 export function AnalyticsTasks({ title, subheader, sx, ...other }: Props) {
-  // 🟢 FIXED: Lấy dữ liệu từ localStorage khi khởi tạo state
   const [tasks, setTasks] = useState<Task[]>(() => {
     const savedTasks = localStorage.getItem('tasks');
     return savedTasks ? JSON.parse(savedTasks) : [];
@@ -38,12 +37,10 @@ export function AnalyticsTasks({ title, subheader, sx, ...other }: Props) {
 
   const [newTask, setNewTask] = useState('');
 
-  // 🔵 FIXED: Lưu vào localStorage mỗi khi task thay đổi
   useEffect(() => {
     localStorage.setItem('tasks', JSON.stringify(tasks));
   }, [tasks]);
 
-  // ✅ Thêm task mới
   const addTask = () => {
     if (!newTask.trim()) return;
     const newTaskItem: Task = {
@@ -55,14 +52,12 @@ export function AnalyticsTasks({ title, subheader, sx, ...other }: Props) {
     setNewTask('');
   };
 
-  // ✅ Toggle hoàn thành task
   const toggleTask = (taskId: string) => {
     setTasks(
       tasks.map((task) => (task.id === taskId ? { ...task, completed: !task.completed } : task))
     );
   };
 
-  // ✅ Xóa task
   const deleteTask = (taskId: string) => {
     setTasks(tasks.filter((task) => task.id !== taskId));
   };
@@ -71,7 +66,6 @@ export function AnalyticsTasks({ title, subheader, sx, ...other }: Props) {
     <Card {...other} sx={{ minHeight: '100%', ...sx }}>
       <CardHeader title={title} subheader={subheader} sx={{ mb: 1 }} />
 
-      {/* 🔹 Form nhập task */}
       <Box sx={{ display: 'flex', gap: 1, px: 2, pb: 2 }}>
         <TextField
           fullWidth
@@ -81,8 +75,8 @@ export function AnalyticsTasks({ title, subheader, sx, ...other }: Props) {
           onChange={(e) => setNewTask(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
-              e.preventDefault(); // Ngăn form submit mặc định
-              addTask(); // Gọi hàm thêm task
+              e.preventDefault();
+              addTask();
             }
           }}
         />
@@ -91,7 +85,6 @@ export function AnalyticsTasks({ title, subheader, sx, ...other }: Props) {
         </Button>
       </Box>
 
-      {/* 🔹 Danh sách task */}
       <Scrollbar sx={{ height: 250 }}>
         <Stack divider={<Divider sx={{ borderStyle: 'dashed' }} />}>
           {[...tasks]

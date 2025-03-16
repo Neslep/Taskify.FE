@@ -54,6 +54,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = useCallback(() => {
     localStorage.removeItem('jwttoken');
     localStorage.removeItem('tasks');
+    localStorage.removeItem('calendarEvents');
     sessionStorage.removeItem('email');
     setToken(null);
     setIsAuthenticated(false);

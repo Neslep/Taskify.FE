@@ -77,6 +77,7 @@ export function SignInView() {
         if (!response.ok || !result.isSuccess) {
           setEmailError('Email or password incorrect!');
           setPasswordError('Email or password incorrect!');
+          setLoading(false);
           throw new Error(result.message || 'Login failed');
         }
 
@@ -191,7 +192,7 @@ export function SignInView() {
         <DialogTitle>Forgot Password</DialogTitle>
         <DialogContent dividers>
           <Typography variant="body1" gutterBottom>
-            Please contact Admin for support for password change!
+            Please contact Admin to support for password change!
           </Typography>
           <Link href="https://www.facebook.com/taskifyvn" target="_blank" rel="noopener">
             👉 Contact admin via Facebook

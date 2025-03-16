@@ -16,6 +16,9 @@ import TimelineSeparator from '@mui/lab/TimelineSeparator';
 import TimelineConnector from '@mui/lab/TimelineConnector';
 import TimelineItem, { timelineItemClasses } from '@mui/lab/TimelineItem';
 
+// Import Scrollbar component (giả sử component này được tạo theo chuẩn của AnalyticsTasks)
+import { Scrollbar } from 'src/components/scrollbar';
+
 import { Gender } from '../../types/enum';
 import { API_BASE_URL } from '../../../config';
 
@@ -72,7 +75,7 @@ export function AnalyticsUserMember({ title, subheader, ...other }: Props) {
           gender: member.gender,
           email: member.email,
         }));
-        console.log('Fetched members:', membersData); // Log fetched members
+        console.log('Fetched members:', membersData);
         setList(membersData);
       }
     } catch (error) {
@@ -98,7 +101,8 @@ export function AnalyticsUserMember({ title, subheader, ...other }: Props) {
     >
       <CardHeader title={title} subheader={subheader} />
 
-      <Box sx={{ height: 250, overflow: 'auto' }}>
+      {/* Sử dụng Scrollbar thay vì Box có overflow */}
+      <Scrollbar sx={{ height: 250 }}>
         {loading ? (
           <Typography variant="body1" align="center" sx={{ mt: 2 }}>
             Loading...
@@ -123,7 +127,7 @@ export function AnalyticsUserMember({ title, subheader, ...other }: Props) {
             Empty List
           </Typography>
         )}
-      </Box>
+      </Scrollbar>
 
       {totalPages > 1 && (
         <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'center', p: 2 }}>
