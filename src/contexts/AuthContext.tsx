@@ -52,9 +52,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // logout: xóa token và reset trạng thái auth
   const logout = useCallback(() => {
-    localStorage.removeItem('jwttoken');
-    localStorage.removeItem('tasks');
-    localStorage.removeItem('calendarEvents');
+    localStorage.clear();
     sessionStorage.removeItem('email');
     setToken(null);
     setIsAuthenticated(false);

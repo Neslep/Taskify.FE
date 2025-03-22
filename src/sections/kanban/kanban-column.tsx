@@ -1,5 +1,3 @@
-import type { KanbanTaskData, KanbanColumnData } from 'src/_mock/_mockKanban';
-
 import { Draggable } from 'react-beautiful-dnd';
 
 import { alpha } from '@mui/material/styles';
@@ -7,13 +5,19 @@ import { Paper, Stack, Typography } from '@mui/material';
 
 import { KanbanCard } from './kanban-card';
 
+import type { KanbanTaskData } from './kanban-card';
+
 interface KanbanColumnProps {
-  column: KanbanColumnData & {
-    tasks: KanbanTaskData[]; // Added from parent mapping
+  column: {
+    id: string;
+    name: string;
+    tasks: KanbanTaskData[];
   };
+  onDeleteTask: (columnId: string, taskId: string) => void;
+  onEditTask: (columnId: string, taskId: string) => void;
 }
 
-export function KanbanColumn({ column }: KanbanColumnProps) {
+export function KanbanColumn({ column, onDeleteTask, onEditTask }: KanbanColumnProps) {
   return (
     <Paper
       sx={{
@@ -28,12 +32,10 @@ export function KanbanColumn({ column }: KanbanColumnProps) {
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             {column.name}
           </Typography>
-
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            {column.taskIds.length} tasks
+            {column.tasks.length} tasks
           </Typography>
         </Stack>
-
         {column.tasks.map((task, index) => (
           <Draggable key={task.id} draggableId={task.id} index={index}>
             {(provided, snapshot) => (
@@ -46,7 +48,11 @@ export function KanbanColumn({ column }: KanbanColumnProps) {
                   opacity: snapshot.isDragging ? 0.8 : 1,
                 }}
               >
-                <KanbanCard task={task} />
+                <KanbanCard
+                  task={task}
+                  onDelete={() => onDeleteTask(column.id, task.id)}
+                  onEdit={() => onEditTask(column.id, task.id)}
+                />
               </div>
             )}
           </Draggable>

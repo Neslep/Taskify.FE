@@ -1,5 +1,4 @@
 import type { DropResult } from 'react-beautiful-dnd';
-import type { KanbanTaskData, KanbanColumnData } from 'src/_mock/_mockKanban';
 
 import { Droppable, DragDropContext } from 'react-beautiful-dnd';
 
@@ -8,15 +7,22 @@ import { Box } from '@mui/material';
 import { KanbanColumn } from './kanban-column';
 
 interface KanbanDndContextProps {
-  columns: Array<
-    KanbanColumnData & {
-      tasks: KanbanTaskData[]; // Added tasks from parent mapping
-    }
-  >;
+  columns: Array<{
+    id: string;
+    name: string;
+    tasks: any[];
+  }>;
   onDragEnd: (result: DropResult) => void;
+  onDeleteTask: (columnId: string, taskId: string) => void;
+  onEditTask: (columnId: string, taskId: string) => void;
 }
 
-export function KanbanDndContext({ columns, onDragEnd }: KanbanDndContextProps) {
+export function KanbanDndContext({
+  columns,
+  onDragEnd,
+  onDeleteTask,
+  onEditTask,
+}: KanbanDndContextProps) {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <Box
@@ -41,7 +47,7 @@ export function KanbanDndContext({ columns, onDragEnd }: KanbanDndContextProps) 
                   width: 280,
                 }}
               >
-                <KanbanColumn column={column} />
+                <KanbanColumn column={column} onDeleteTask={onDeleteTask} onEditTask={onEditTask} />
                 {provided.placeholder}
               </div>
             )}

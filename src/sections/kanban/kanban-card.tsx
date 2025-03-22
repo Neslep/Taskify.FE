@@ -1,7 +1,5 @@
-import type { KanbanTaskData } from 'src/_mock/_mockKanban';
-
 import { styled } from '@mui/material/styles';
-import { Card, Chip, Stack, Avatar, Typography } from '@mui/material';
+import { Card, Chip, Stack, Avatar, Button, Typography } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -15,22 +13,33 @@ const StyledCard = styled(Card)(({ theme }) => ({
   },
 }));
 
-interface Props {
-  task: KanbanTaskData;
+// Định nghĩa kiểu dữ liệu cho task (có thể tùy chỉnh thêm các field nếu cần)
+export interface KanbanTaskData {
+  id: string;
+  name: string;
+  description: string;
+  priority: 'low' | 'medium' | 'high';
+  assignee?: { name: string; avatar: string };
+  attachments?: number;
+  comments?: number;
 }
 
-export function KanbanCard({ task }: Props) {
+interface Props {
+  task: KanbanTaskData;
+  onDelete: () => void;
+  onEdit: () => void;
+}
+
+export function KanbanCard({ task, onDelete, onEdit }: Props) {
   return (
     <StyledCard sx={{ p: 2 }}>
       <Stack spacing={2}>
         <Typography variant="subtitle2">{task.name}</Typography>
-
         {task.description && (
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             {task.description}
           </Typography>
         )}
-
         <Stack direction="row" alignItems="center" spacing={2}>
           {task.assignee && (
             <Avatar
@@ -39,7 +48,6 @@ export function KanbanCard({ task }: Props) {
               sx={{ width: 32, height: 32 }}
             />
           )}
-
           <Stack direction="row" spacing={1} flexGrow={1}>
             <Chip
               size="small"
@@ -53,7 +61,6 @@ export function KanbanCard({ task }: Props) {
               }
             />
           </Stack>
-
           <Stack direction="row" spacing={1} alignItems="center">
             {task.attachments && (
               <Stack direction="row" spacing={0.5} alignItems="center">
@@ -68,6 +75,14 @@ export function KanbanCard({ task }: Props) {
               </Stack>
             )}
           </Stack>
+        </Stack>
+        <Stack direction="row" spacing={1} justifyContent="flex-end">
+          <Button size="small" onClick={onEdit}>
+            Edit
+          </Button>
+          <Button size="small" color="error" onClick={onDelete}>
+            Delete
+          </Button>
         </Stack>
       </Stack>
     </StyledCard>
