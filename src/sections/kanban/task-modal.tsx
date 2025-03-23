@@ -4,11 +4,18 @@ import {
   Stack,
   Dialog,
   Button,
+  Select,
+  MenuItem,
   TextField,
+  InputLabel,
   DialogTitle,
+  FormControl,
   DialogContent,
   DialogActions,
+  FormHelperText,
 } from '@mui/material';
+
+// --------------------------------------------------
 
 interface TaskModalProps {
   open: boolean;
@@ -42,7 +49,7 @@ export function TaskModal({ open, onClose, onSave, initialTask, isEdit = false }
   }, [initialTask, open]);
 
   const handleSave = () => {
-    if (name.trim() === '') return; // validation đơn giản
+    if (name.trim() === '') return; // simple validation
     onSave({ name, description, priority });
   };
 
@@ -65,16 +72,21 @@ export function TaskModal({ open, onClose, onSave, initialTask, isEdit = false }
             multiline
             rows={3}
           />
-          <TextField
-            label="Priority"
-            value={priority}
-            onChange={(e) => {
-              const val = e.target.value as 'low' | 'medium' | 'high';
-              setPriority(val);
-            }}
-            fullWidth
-            helperText="Enter low, medium, or high"
-          />
+          <FormControl fullWidth>
+            <InputLabel id="priority-select-label">Priority</InputLabel>
+            <Select
+              labelId="priority-select-label"
+              id="priority-select"
+              value={priority}
+              label="Priority"
+              onChange={(e) => setPriority(e.target.value as 'low' | 'medium' | 'high')}
+            >
+              <MenuItem value="low">Low</MenuItem>
+              <MenuItem value="medium">Medium</MenuItem>
+              <MenuItem value="high">High</MenuItem>
+            </Select>
+            <FormHelperText>Select the task priority level</FormHelperText>
+          </FormControl>
         </Stack>
       </DialogContent>
       <DialogActions>

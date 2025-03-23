@@ -1,8 +1,9 @@
+import type { AlertColor } from '@mui/material';
 import type { DropResult } from 'react-beautiful-dnd';
 
 import { useState, useEffect } from 'react';
 
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Alert, Button, Snackbar, Typography } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -11,6 +12,8 @@ import { TaskModal } from 'src/sections/kanban/task-modal';
 import { KanbanDndContext } from './kanban-dnd-context';
 
 import type { KanbanTaskData } from './kanban-card';
+
+// --------------------------------------------------
 
 export interface ColumnData {
   id: string;
@@ -37,10 +40,22 @@ export function KanbanView() {
     null
   );
 
+  // Snackbar state (updated to match your example)
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<AlertColor>('success');
+
   // Cập nhật localStorage mỗi khi columns thay đổi
   useEffect(() => {
     localStorage.setItem('kanbanColumns', JSON.stringify(columns));
   }, [columns]);
+
+  // Show snackbar with message
+  const showSnackbar = (message: string, severity: AlertColor = 'success') => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
 
   // Drag & drop handler
   const handleDragEnd = (result: DropResult) => {
@@ -76,13 +91,24 @@ export function KanbanView() {
 
   // Xóa task khỏi cột tương ứng
   const handleDeleteTask = (columnId: string, taskId: string) => {
+    const columnIndex = columns.findIndex((col) => col.id === columnId);
+    if (columnIndex === -1) return;
+
+    const taskIndex = columns[columnIndex].tasks.findIndex((task) => task.id === taskId);
+    if (taskIndex === -1) return;
+
+    const taskName = columns[columnIndex].tasks[taskIndex].name;
+    const columnName = columns[columnIndex].name;
+
     const newColumns = columns.map((col) => {
       if (col.id === columnId) {
         return { ...col, tasks: col.tasks.filter((task) => task.id !== taskId) };
       }
       return col;
     });
+
     setColumns(newColumns);
+    showSnackbar(`Task "${taskName}" deleted from ${columnName}`, 'success');
   };
 
   // Mở modal để sửa task
@@ -110,7 +136,13 @@ export function KanbanView() {
         return col;
       });
       setColumns(newColumns);
+      showSnackbar(`New task "${data.name}" added to ${columns[0].name}`, 'success');
     } else if (modalType === 'edit' && editingTask) {
+      const columnIndex = columns.findIndex((col) => col.id === editingTask.columnId);
+      if (columnIndex === -1) return;
+
+      const columnName = columns[columnIndex].name;
+
       const newColumns = columns.map((col) => {
         if (col.id === editingTask.columnId) {
           const newTasks = col.tasks.map((task) =>
@@ -121,6 +153,7 @@ export function KanbanView() {
         return col;
       });
       setColumns(newColumns);
+      showSnackbar(`Task "${data.name}" updated in ${columnName}`, 'success');
     }
     setModalOpen(false);
   };
@@ -165,6 +198,22 @@ export function KanbanView() {
         }
         isEdit={modalType === 'edit'}
       />
+
+      {/* Snackbar thông báo */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          sx={{ width: '100%' }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

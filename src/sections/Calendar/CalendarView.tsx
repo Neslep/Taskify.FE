@@ -1,3 +1,4 @@
+import type { AlertColor } from '@mui/material';
 import type { EventInput, DateSelectArg, EventClickArg } from '@fullcalendar/core';
 
 import dayjs from 'dayjs';
@@ -15,10 +16,12 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import {
   Box,
   Menu,
+  Alert,
   Dialog,
   Button,
   Switch,
   MenuItem,
+  Snackbar,
   TextField,
   Typography,
   DialogTitle,
@@ -61,6 +64,11 @@ export default function CalendarView() {
   );
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
+  // State cho Snackbar thông báo
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<AlertColor>('success');
+
   // Map viewName sang text hiển thị
   const viewsMap = {
     dayGridMonth: 'Month',
@@ -86,6 +94,13 @@ export default function CalendarView() {
       calendarApi.changeView(viewName);
     }
   }, [viewName]);
+
+  // Hàm helper để hiển thị thông báo snackbar
+  const showSnackbar = (message: string, severity: AlertColor = 'success') => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     setOpen(true);
@@ -124,8 +139,15 @@ export default function CalendarView() {
   const handleCreateOrEdit = () => {
     if (!eventInitValue.title.trim()) {
       setTitleError('Title cannot be blank!');
+      showSnackbar('Please provide an event title', 'error');
       return;
     }
+
+    if (eventInitValue.end < eventInitValue.start) {
+      showSnackbar('End time cannot be before start time', 'error');
+      return;
+    }
+
     const { id, title, description, start, end, allDay, color } = eventInitValue;
     const newEvent: EventInput = {
       id,
@@ -136,17 +158,22 @@ export default function CalendarView() {
       end: end.toDate(),
       extendedProps: { description },
     };
+
     if (eventFormType === 'edit') {
       setCalendarEvents((prev) => prev.map((event) => (event.id === id ? newEvent : event)));
+      showSnackbar('Event updated successfully');
     } else {
       setCalendarEvents((prev) => [...prev, newEvent]);
+      showSnackbar('Event created successfully');
     }
+
     handleCancel();
   };
 
   const handleDelete = () => {
     setCalendarEvents((prev) => prev.filter((event) => event.id !== eventInitValue.id));
     handleCancel();
+    showSnackbar('Event deleted', 'warning');
   };
 
   // Hàm cho dropdown view với chữ ký phù hợp: (ev: MouseEvent, element: HTMLElement) => void
@@ -155,10 +182,15 @@ export default function CalendarView() {
   };
 
   const handleCloseMenu = (selectedView?: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay') => {
-    if (selectedView) {
+    if (selectedView && selectedView !== viewName) {
       setViewName(selectedView);
+      showSnackbar(`View changed to ${viewsMap[selectedView]}`, 'info');
     }
     setAnchorEl(null);
+  };
+
+  const handleTodayClick = () => {
+    showSnackbar('Calendar navigated to today', 'info');
   };
 
   return (
@@ -194,19 +226,25 @@ export default function CalendarView() {
           events={calendarEvents}
           select={handleDateSelect}
           eventClick={handleEventClick}
-          headerToolbar={{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'customViews',
-          }}
+          datesSet={() => {}} // Can add date navigation feedback here if needed
           customButtons={{
             customViews: {
               text: viewsMap[viewName],
               click: handleOpenMenuCustom,
             },
+            today: {
+              text: 'Today',
+              click: handleTodayClick,
+            },
           }}
-          buttonText={{ today: 'Today' }}
+          headerToolbar={{
+            left: 'prev,next today',
+            center: 'title',
+            right: 'customViews',
+          }}
           height="80vh"
+          eventDrop={() => showSnackbar('Event moved successfully')}
+          eventResize={() => showSnackbar('Event duration updated')}
         />
 
         {/* Dropdown menu cho việc chọn view */}
@@ -341,6 +379,22 @@ export default function CalendarView() {
             </Button>
           </DialogActions>
         </Dialog>
+
+        {/* Snackbar thông báo */}
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={3000}
+          onClose={() => setSnackbarOpen(false)}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        >
+          <Alert
+            onClose={() => setSnackbarOpen(false)}
+            severity={snackbarSeverity}
+            sx={{ width: '100%' }}
+          >
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
       </Box>
     </Box>
   );

@@ -54,6 +54,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = useCallback(() => {
     localStorage.clear();
     sessionStorage.removeItem('email');
+    indexedDB.deleteDatabase('FileDB');
     setToken(null);
     setIsAuthenticated(false);
     setUser(null);
