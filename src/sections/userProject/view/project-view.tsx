@@ -50,12 +50,14 @@ export function ProjectView() {
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [errorSnackbar, setErrorSnackbar] = useState({ open: false, message: '' });
   const [projects, setProjects] = useState<ProjectType[]>([]);
+
+
+
+
   const [newProject, setNewProject] = useState({
     name: '',
     description: '',
     status: ProjectStatus.NotStarted,
-    memberEmail: '',
-    memberEmails: [] as string[],
   });
   const [editProject, setEditProject] = useState<ProjectType | null>(null);
 
@@ -80,6 +82,7 @@ export function ProjectView() {
         const projectsData = result.data.$values.map((project: any) => ({
           ...project,
           userProjects: project.userProjects.$values,
+          tasks: project.tasks.$values,
         }));
         setProjects(projectsData);
       }
@@ -93,18 +96,12 @@ export function ProjectView() {
     fetchProject();
   }, [fetchProject]); // Theo dõi sự thay đổi của projects
 
+  // Cập nhật hàm handleCreateProject
   const handleCreateProject = async () => {
     setLoading(true);
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (newProject.name.length < 3) {
       setErrorSnackbar({ open: true, message: 'Project name must be at least 3 characters long' });
-      setLoading(false);
-      return;
-    }
-
-    if (newProject.memberEmail && !emailRegex.test(newProject.memberEmail)) {
-      setErrorSnackbar({ open: true, message: 'Invalid email format' });
       setLoading(false);
       return;
     }
@@ -133,7 +130,6 @@ export function ProjectView() {
           projectName: newProject.name,
           description: newProject.description,
           projectStatus: newProject.status,
-          memberEmails: newProject.memberEmails, // Allow empty emails
         }),
       });
 
@@ -150,8 +146,6 @@ export function ProjectView() {
           name: '',
           description: '',
           status: ProjectStatus.NotStarted,
-          memberEmail: '',
-          memberEmails: [],
         });
         handleCloseCreateDialog();
         setErrorSnackbar({ open: true, message: 'Project created successfully' });
@@ -166,7 +160,6 @@ export function ProjectView() {
 
   const handleEditProject = async () => {
     setLoading(true);
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!editProject) {
       setLoading(false);
@@ -175,15 +168,6 @@ export function ProjectView() {
 
     if (editProject.projectName.length < 3) {
       setErrorSnackbar({ open: true, message: 'Project name must be at least 3 characters long' });
-      setLoading(false);
-      return;
-    }
-
-    if (
-      editProject.memberEmails &&
-      !editProject.memberEmails.every((email) => emailRegex.test(email))
-    ) {
-      setErrorSnackbar({ open: true, message: 'Invalid email format' });
       setLoading(false);
       return;
     }
@@ -221,8 +205,7 @@ export function ProjectView() {
     } catch (error) {
       console.error('Error editing project:', error);
       setErrorSnackbar({ open: true, message: 'Error editing project' });
-    }
-    finally {
+    } finally {
       setLoading(false);
     }
   };
@@ -306,6 +289,7 @@ export function ProjectView() {
     filterName,
   });
 
+
   const notFound = !dataFiltered.length && !!filterName;
 
   return (
@@ -369,8 +353,7 @@ export function ProjectView() {
                       selected={table.selected.includes(row.id)}
                       onSelectRow={() => table.onSelectRow(row.id)}
                       onEditRow={() => handleOpenEditDialog(row as unknown as ProjectType)}
-                      onDeleteRow={() => handleDeleteProject(row.id)} // Add this line
-                    />
+                      onDeleteRow={() => handleDeleteProject(row.id)} />
                   ))}
                 <TableEmptyRows
                   height={68}
@@ -425,18 +408,6 @@ export function ProjectView() {
               <MenuItem value={ProjectStatus.InProgress}>In Progress</MenuItem>
             </Select>
           </FormControl>
-          <TextField
-            margin="dense"
-            label="Member Emails"
-            fullWidth
-            value={newProject.memberEmails.join(', ') || ''}
-            onChange={(e) =>
-              setNewProject({
-                ...newProject,
-                memberEmails: e.target.value.split(',').map((email) => email.trim()),
-              })
-            }
-          />
         </DialogContent>
         <DialogActions>
           <Button variant="contained" color="inherit" onClick={handleCreateProject} disabled={loading}>
@@ -478,30 +449,16 @@ export function ProjectView() {
               onChange={(e) =>
                 setEditProject(
                   (prev) =>
-                    prev && { ...prev, projectStatus: e.target.value as unknown as ProjectStatus }
+                    prev && { ...prev, projectStatus: e.target.value as ProjectStatus }
                 )
               }
               variant="outlined"
             >
               <MenuItem value={ProjectStatus.NotStarted}>Not Started</MenuItem>
               <MenuItem value={ProjectStatus.InProgress}>In Progress</MenuItem>
+              <MenuItem value={ProjectStatus.Completed}>Completed</MenuItem>
             </Select>
           </FormControl>
-          <TextField
-            margin="dense"
-            label="Member Emails"
-            fullWidth
-            value={editProject?.memberEmails?.join(', ') || ''}
-            onChange={(e) =>
-              setEditProject(
-                (prev) =>
-                  prev && {
-                    ...prev,
-                    memberEmails: e.target.value.split(',').map((email) => email.trim()),
-                  }
-              )
-            }
-          />
         </DialogContent>
         <DialogActions>
           <Button variant="contained" color="inherit" onClick={handleEditProject} disabled={loading}>

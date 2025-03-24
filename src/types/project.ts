@@ -1,64 +1,77 @@
-import type { Gender, PlanType, ProjectRoles, ProjectStatus } from './enum';
+import { Gender, PlanType, PriorityLevel, ProjectRoles, ProjectStatus, TaskStatus } from './enum';
 
 export interface ProjectType {
-    id: string;
-    projectName: string;
-    description: string;
-    projectStatus: ProjectStatus | string;
-    ownerId?: number;
-    owner?: UserType[];
-    userProjects: UserProjectType[];
-    tasks: TaskType[];
-    kanbans: KanbanType[];
-    todolists: TodolistType[];
-    memberEmails?: string[];
+  id: string;
+  projectName: string;
+  description: string;
+  projectStatus: ProjectStatus | string;
+  ownerId?: number;
+  owner?: UserType[];
+  userProjects: UserProjectType[];
+  tasks: TaskType[];
+  kanbans: KanbanType[];
+  todolists: TodolistType[];
 }
 
 export interface UserType {
-    id: number;
-    name: string;
-    avatar: string;
-    gender: Gender | string;
-    email: string;
-    plans: PlanType | string;
+  id: string;
+  userName: string;
+  gender: Gender | string;
+  email: string;
+  plans: PlanType | string;
 }
 
 export interface UserProjectType {
-    id: number;
-    userId: number;
-    projectId: string;
-    roleInProject: ProjectRoles | string;
+  id: string;
+  avatar: string;
+  userId: number;
+  member: UserType[];
+  projectId: string;
+  roleInProject: ProjectRoles | string;
 
-    // Add other properties as needed
+  // Add other properties as needed
 }
 
-export interface TaskType {
-    id: string;
-    name: string;
-    // Add other properties as needed
-}
+export type TaskType = {
+  assignedUser: UserType;
+  id: string;
+  taskName: string;
+  dueDate: Date ;
+  priority: string | PriorityLevel;
+  status: string | TaskStatus;
+  assignedUserId: number;
+};
 
 export interface KanbanType {
-    id: string;
-    name: string;
-    // Add other properties as needed
+  id: string;
+  name: string;
+  // Add other properties as needed
 }
 
 export interface TodolistType {
-    id: string;
-    name: string;
-    // Add other properties as needed
+  id: string;
+  name: string;
+  // Add other properties as needed
 }
 
 export type ProjectProps = {
-    id: string;
-    name: string;
-    description: string;
-    status: ProjectStatus; // Now it's of type ProjectStatus
+  id: string;
+  name: string;
+  description: string;
+  status: ProjectStatus;
 };
 
 export type ProjectTableRowProps = {
-    row: ProjectProps;
-    selected: boolean;
-    onSelectRow: () => void;
+  row: ProjectProps;
+  selected: boolean;
+  onSelectRow: () => void;
+};
+
+export type TaskProps = {
+  id: string;
+  taskName: string;
+  assignee: { userName: string , userId: string, gender: Gender | string, userEmail: string}[];
+  dueDate: Date | string;
+  priority: PriorityLevel;
+  status: TaskStatus;
 };
