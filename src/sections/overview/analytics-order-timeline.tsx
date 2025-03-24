@@ -75,7 +75,6 @@ export function AnalyticsUserMember({ title, subheader, ...other }: Props) {
           gender: member.gender,
           email: member.email,
         }));
-        console.log('Fetched members:', membersData);
         setList(membersData);
       }
     } catch (error) {

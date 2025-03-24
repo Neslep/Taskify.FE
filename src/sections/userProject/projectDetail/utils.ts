@@ -1,4 +1,5 @@
-import type { ProjectProps } from './project-table-row';
+
+import type { TaskProps } from '../../../types/project';
 
 // ----------------------------------------------------------------------
 
@@ -53,7 +54,7 @@ export function getComparator<Key extends keyof any>(
 // ----------------------------------------------------------------------
 
 type ApplyFilterProps = {
-  inputData: ProjectProps[];
+  inputData: TaskProps[];
   filterName: string;
   comparator: (a: any, b: any) => number;
 };
